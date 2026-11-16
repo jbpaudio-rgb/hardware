@@ -1,0 +1,1406 @@
+# Octavio box: the factory sounds, 5 per engine (MIXER > PRESETS > ENGINE).
+# "# <engine id>" starts an engine, "## <NAME>" a sound; then "<control id> <value>" lines. Loading a sound puts every
+# control of the engine back to its default first, then sets these. Shorthands:
+#   pat <track> <16 digits>   the track's pattern (0 off, 1 on, 2 accent) = p<track>_0 .. p<track>_15
+#   pit <track> <16 values>   the DFAM's step pitches (-1..1)            = n<track>_0 .. n<track>_15
+# tools/sounds.py makes FactorySounds.h from this file.
+
+# mini
+## FAT BASS
+o1range 2
+o1wave 2
+o2range 2
+o2wave 3
+o2freq 0.09
+o2lvl 7
+o3on 1
+o3range 1
+o3wave 0
+o3lvl 6
+cutoff -2.4
+emph 2.5
+camt 5.5
+fdec 0.32
+fsus 2
+ldec 0.4
+lsus 9
+drift 0.25
+## SOLO LEAD
+o1range 3
+o1wave 2
+o2range 3
+o2wave 2
+o2freq 0.14
+o3on 1
+o3range 4
+o3wave 3
+o3lvl 3
+cutoff 0.6
+emph 4
+camt 4
+fatt 0.03
+fdec 0.45
+fsus 6
+latt 0.02
+lsus 9
+glideon 1
+glide 0.22
+## BRASS
+o1range 3
+o1wave 2
+o2range 3
+o2wave 2
+o2freq 0.1
+o2lvl 8
+cutoff -1.6
+emph 1.5
+camt 7
+fatt 0.2
+fdec 0.5
+fsus 5
+latt 0.1
+ldec 0.6
+lsus 8
+## ACID PLUCK
+o1range 3
+o1wave 3
+o2on 0
+cutoff -1.8
+emph 6.5
+camt 8
+fdec 0.26
+fsus 0
+ldec 0.32
+lsus 0
+## SOFT PAD
+o1range 3
+o1wave 0
+o2range 3
+o2wave 2
+o2freq 0.18
+o2lvl 5
+o3on 1
+o3range 4
+o3wave 0
+o3lvl 3
+cutoff -0.6
+emph 1
+camt 2.5
+fatt 0.55
+fdec 0.7
+fsus 6
+latt 0.55
+ldec 0.7
+lsus 8
+
+# pro70
+## POLY BRASS
+oasaw 1
+obsaw 1
+obfine 0.08
+mxa 8
+mxb 7
+cutoff 0.3
+res 0.12
+fenvamt 0.55
+fatt 0.18
+fdec 0.5
+fsus 0.45
+frel 0.35
+aatt 0.08
+adec 0.5
+asus 0.9
+arel 0.35
+## WARM STRINGS
+oasaw 1
+obsaw 1
+obfine 0.12
+mxa 7
+mxb 7
+cutoff 0.48
+res 0.08
+fenvamt 0.2
+fatt 0.5
+fdec 0.6
+fsus 0.6
+frel 0.6
+aatt 0.45
+adec 0.6
+asus 0.9
+arel 0.6
+wmamt 0.15
+wmfreqa 1
+wmfreqb 1
+lfofreq 0.42
+## SYNC LEAD
+oasaw 0
+oapulse 1
+oapw 0.4
+obsaw 1
+obfreq 7
+oasync 0
+mxa 6
+mxb 8
+pmfenv 0.45
+pmfreqa 1
+cutoff 0.62
+res 0.25
+fenvamt 0.3
+fdec 0.4
+fsus 0.5
+aatt 0.01
+asus 1
+arel 0.25
+glide 0.15
+## BELL KEYS
+oasaw 0
+oapulse 1
+oapw 0.5
+obsaw 0
+obtri 1
+obfreq 19
+mxa 6
+mxb 5
+pmoscb 0.35
+pmfreqa 1
+cutoff 0.58
+res 0.1
+fenvamt 0.4
+fdec 0.35
+fsus 0.2
+frel 0.5
+aatt 0
+adec 0.6
+asus 0.15
+arel 0.6
+## THICK BASS
+unison 1
+oasaw 1
+obsaw 1
+obfine 0.1
+obfreq -12
+mxa 8
+mxb 7
+mxs 5
+cutoff 0.22
+res 0.2
+fenvamt 0.5
+fdec 0.3
+fsus 0.15
+aatt 0
+adec 0.45
+asus 0.7
+arel 0.15
+
+# a26
+## DUO LEAD
+v1co -12
+v2co -12
+v2fi 0.12
+fv1 7
+fv1w 0
+fv2 7
+fv2w 0
+cutoff 0.5
+res 0.3
+fenv 0.4
+ea 0.02
+ed 0.4
+es 0.5
+er 0.3
+vibd 0.15
+vibdel 0.4
+porta 0.15
+rev 0.2
+## RING BELLS
+v1co 0
+v2co 7
+v2fi 0
+fv1 0
+fv2 0
+fring 8
+rm1 1
+rm2 1
+cutoff 0.75
+res 0.1
+fenv 0.2
+ara 0.0
+arr 0.6
+vcaar 1
+rev 0.4
+revdec 0.7
+## SAMPLE & HOLD
+v1co -12
+fv1 8
+fv1w 0
+fv2 0
+cutoff 0.35
+res 0.65
+fenv 0.1
+fsh 0.6
+shclk 0.6
+shin 0
+shtrig 0
+ara 0.0
+arr 0.45
+rev 0.3
+## SUB BASS
+v1co -24
+v2co -24
+v2fi 0.06
+v3co -36
+fv1 7
+fv1w 1
+fv2 6
+fv2w 0
+cutoff 0.25
+res 0.15
+fenv 0.45
+ea 0
+ed 0.3
+es 0.2
+er 0.15
+vcaar 0
+vcaadsr 1
+rev 0.05
+## NOISE WIND
+fv1 0
+fv2 0
+fnoise 10
+ncol 0.6
+cutoff 0.68
+res 0.4
+fkbd 0.9
+fenv 0.15
+ea 0.5
+ed 0.6
+es 0.6
+er 0.6
+vcaar 1
+ara 0.35
+arr 0.6
+rev 0.55
+revdec 0.8
+
+# j8
+## JUNO PAD
+w1 1
+w2 1
+fine2 0.1
+mix 0.5
+freq 0.45
+res 0.1
+venv 0.2
+e1a 0.5
+e1d 0.6
+e1s 0.6
+e1r 0.6
+e2a 0.5
+e2d 0.6
+e2s 0.85
+e2r 0.6
+pwm 0.4
+pwmsrc 0
+## POLY KEYS
+w1 2
+w2 1
+mix 0.4
+pwm 0.35
+pwmsrc 1
+freq 0.4
+res 0.12
+venv 0.5
+e1a 0
+e1d 0.4
+e1s 0.25
+e1r 0.35
+e2a 0
+e2d 0.55
+e2s 0.4
+e2r 0.4
+## FAT UNISON
+assign 1
+udet 0.35
+w1 1
+w2 1
+mix 0.5
+freq 0.5
+res 0.2
+venv 0.35
+e1d 0.45
+e1s 0.4
+e2s 0.9
+e2r 0.3
+## HOLLOW BASS
+r1 2
+r2 2
+w1 3
+w2 0
+mix 0.3
+freq 0.28
+res 0.35
+venv 0.45
+e1a 0
+e1d 0.3
+e1s 0
+e2a 0
+e2d 0.4
+e2s 0.6
+e2r 0.15
+## CROSS MOD
+w1 1
+w2 1
+r2 2
+cross 0.45
+sync 1
+mix 0.7
+freq 0.55
+res 0.25
+venv 0.35
+menv 0.4
+e1a 0
+e1d 0.5
+e1s 0.2
+e2s 0.8
+e2r 0.35
+
+# cs8
+## CS STRINGS
+asaw 0.8
+asq 0
+alpf 0.5
+alres 0.1
+afa 0.4
+afd 0.6
+aaa 0.4
+aad 0.6
+aas 0.9
+aar 0.6
+bsaw 0.7
+bsq 0
+bsine 0
+bfeet 1
+blpf 0.5
+baa 0.45
+bas 0.9
+bar 0.65
+blvl 0.55
+det 0.15
+sospd 0.45
+sovco 0.08
+alvl 1
+
+## CS BRASS
+asaw 0.9
+alpf 0.32
+alres 0.2
+ail -0.1
+aal 0.8
+afa 0.18
+afd 0.5
+aaa 0.08
+aad 0.5
+aas 0.85
+aar 0.35
+blvl 0
+alvl 1
+
+## SWEEP PAD
+asaw 0.7
+asq 0.3
+apwm 0.4
+alpf 0.36
+alres 0.45
+aal 0.6
+afa 0.7
+afd 0.8
+aaa 0.5
+aas 0.9
+aar 0.7
+bsine 0.6
+bsq 0
+bfeet 0
+blvl 0.4
+baa 0.5
+bar 0.7
+sovcf 0.15
+sospd 0.25
+alvl 1
+
+## SOFT BELL
+asaw 0
+asine 0.9
+alpf 0.7
+afa 0
+aaa 0
+aad 0.6
+aas 0
+aar 0.6
+bsine 0.6
+bsq 0
+bfeet 2
+baa 0
+bad 0.35
+bas 0
+bar 0.4
+blvl 0.7
+rmdep 0.25
+rmspd 0.6
+alvl 1
+
+## CS BASS
+afeet 0
+asaw 0.9
+asq 0.4
+alpf 0.42
+alres 0.3
+aal 0.85
+afa 0
+afd 0.3
+aaa 0
+aad 0.4
+aas 0.6
+aar 0.15
+blvl 0.7
+alvl 1
+bfeet 0
+bsq 0.8
+bsine 0.4
+blpf 0.35
+baa 0
+bad 0.4
+bas 0.7
+bar 0.15
+
+# vc3
+## DRONE
+o1f 4.5
+o2f 4.52
+o1saw 6
+o2tri 6
+ff 4.5
+fres 6
+flvl 8
+ea 6
+eon 8
+edec 6
+eoff 3
+rmix 4
+pin1_5 1
+pin3_5 1
+pin8_2 1
+pin10_0 1
+pin10_1 1
+pin10_6 1
+pin11_0 1
+pin11_1 1
+pin14_7 1
+pin14_8 1
+pin5_10 2
+o3f 1.5
+## RING METAL
+o1sin 7
+o1saw 0
+o2sq 7
+o2tri 0
+o2f 6.5
+rlvl 8
+ea 0
+eon 0
+edec 4
+eoff 10
+pin0_3 1
+pin2_4 1
+pin7_2 1
+pin10_0 1
+pin10_1 1
+pin10_6 1
+pin11_1 1
+pin14_7 1
+pin14_8 1
+out1 3.5
+out2 3.5
+
+## NOISE SWEEP
+nlvl 8
+ncol 0
+ff 3
+fres 8
+ea 3
+eon 4
+edec 6
+eoff 6
+pin6_5 1
+pin8_2 1
+pin10_0 1
+pin10_1 1
+pin10_6 1
+pin11_0 1
+pin11_1 1
+pin5_10 1
+pin14_10 1
+o3f 1
+## BUBBLES
+o1saw 7
+o3f 2.5
+o3sq 6
+ff 5
+fres 8.5
+ea 0
+eon 1
+edec 4
+eoff 10
+pin1_5 1
+pin4_10 1
+pin8_2 1
+pin10_0 1
+pin10_1 1
+pin10_6 1
+pin11_1 1
+pin14_7 1
+## SPACE LEAD
+o1saw 7
+o2tri 5
+o2f 6.07
+ff 6
+fres 4
+ea 1
+eon 3
+edec 5
+eoff 10
+rmix 5
+pin1_5 1
+pin3_5 1
+pin8_2 1
+pin10_0 1
+pin10_1 1
+pin10_6 1
+pin11_0 1
+pin11_1 1
+pin14_7 1
+pin14_8 1
+pin5_7 2
+o3f 3.5
+
+# m20
+## MS BASS
+v1wave 1
+v1scale 1
+v2wave 0
+v2scale 1
+v2pitch 0.12
+v2lvl 6
+lpf 3
+lpk 5
+leg 3.5
+e2a 0
+e2d 3.5
+e2s 3
+e2r 2
+drive 4
+## SCREAM LEAD
+v1wave 1
+v1scale 2
+v2wave 1
+v2scale 2
+v2pitch 7
+v2lvl 5
+hpf 2.5
+hpk 6
+lpf 5
+lpk 8
+leg 2
+e2a 0.5
+e2d 5
+e2s 7
+e2r 3
+drive 6
+porta 2
+## SYNC SWEEP
+v1wave 1
+v1scale 1
+v1lvl 0
+v2wave 0
+v2scale 1
+v2pitch 5
+v2lvl 8
+fmeg 3
+e1a 3
+e1r 5
+lpf 6
+lpk 3
+leg 2
+e2a 0.5
+e2d 4
+e2s 7
+e2r 3
+## PERC BLIP
+v1wave 2
+v1scale 2
+v1pw 3
+lpf 3.5
+lpk 7
+leg 4.5
+e2a 0
+e2d 2.2
+e2s 0
+e2r 2
+drive 3
+## WOBBLE
+v1wave 1
+v1scale 1
+v2wave 1
+v2scale 1
+v2pitch -0.1
+v2lvl 7
+lpf 3.5
+lpk 6
+lmg 4
+mgfreq 5.5
+mgshape 5
+leg 1
+e2a 0
+e2d 5
+e2s 8
+e2r 2
+drive 4
+
+# easel
+## WEST COAST
+pwave 2
+timbre 0.4
+modmode 2
+modidx 0.25
+mfreq 0.55
+g0mode 1
+g0cv 0
+g0lvl 0
+g0out 0.85
+eatt 0.02
+edec 0.45
+esus 0
+emode 0
+rev 0.25
+## BONGO
+pwave 2
+timbre 0.2
+modmode 2
+modidx 0.15
+g0mode 2
+g0cv 0
+eatt 0
+edec 0.22
+esus 0
+emode 0
+rev 0.3
+## SEQUENCE
+pwave 1
+timbre 0.5
+tcv 1
+tcva 0.4
+pcv 1
+pcva 0.25
+modmode 2
+modidx 0.3
+g0mode 1
+g0cv 1
+pmode 0
+prate 0.45
+vstages 2
+vadv 0
+etrig 1
+eatt 0
+edec 0.35
+rev 0.3
+## DRONE FOLD
+pwave 0
+timbre 0.65
+tcv 3
+tcva 0.3
+modmode 2
+modidx 0.45
+mfreq 0.35
+mrange 0
+ixcv 3
+ixcva 0.4
+g0mode 1
+g0cv 4
+g0lvl 0.7
+eatt 0.6
+edec 0.7
+esus 0.8
+emode 1
+rev 0.45
+revtime 0.7
+## AM BELL
+pwave 2
+timbre 0.15
+modmode 1
+modidx 0.6
+mfreq 0.72
+mrange 1
+g0mode 2
+g0cv 0
+eatt 0
+edec 0.6
+esus 0
+emode 0
+rev 0.4
+revtime 0.65
+
+# vact
+## SPECTRAL PAD
+timbre 0.3
+modidx 0.1
+moddest 1
+g0lvl 0.4
+g0mode 2
+f0att 0.5
+f0dec 0.7
+f0mode 1
+spmix 0.5
+spwidth 0.8
+## FM PLUCK
+timbre 0.2
+modidx 0.45
+moddest 1
+mfreq 0.62
+g0lvl 0.85
+g0mode 1
+f0att 0
+f0dec 0.35
+f0mode 0
+## SHIFTER
+timbre 0.35
+g0src 4
+g0lvl 0.8
+g0mode 2
+fsshift 0.12
+fsblend 0
+f0att 0.3
+f0dec 0.6
+f0mode 1
+## AM CHIME
+timbre 0.1
+modidx 0.7
+moddest 0
+mfreq 0.8
+g0lvl 0.85
+g0mode 1
+f0att 0
+f0dec 0.55
+f0mode 0
+spmix 0.3
+## FOLD LEAD
+timbre 0.7
+sym 0.2
+order 0.3
+modidx 0.15
+moddest 2
+g0lvl 0.8
+g0mode 2
+f0att 0.02
+f0dec 0.5
+f0mode 1
+glide 0.15
+
+# dx7
+## E.PIANO
+alg 4
+fb 6
+## BRASS
+alg 21
+fb 7
+pr1 84
+pr2 95
+pr3 95
+pr4 60
+pl1 47
+pl2 50
+pl3 50
+pl4 50
+lspd 37
+lpmd 6
+pms 3
+ldel 30
+o1coarse 1
+o1fine 0
+o1det 0
+o1lvl 98
+o1vel 1
+o1rs 2
+o1kls 0
+o1r1 72
+o1r2 76
+o1r3 99
+o1r4 71
+o1l1 99
+o1l2 88
+o1l3 96
+o1l4 0
+o2coarse 1
+o2fine 0
+o2det 0
+o2lvl 86
+o2vel 2
+o2rs 2
+o2kls 0
+o2r1 62
+o2r2 51
+o2r3 29
+o2r4 71
+o2l1 82
+o2l2 95
+o2l3 96
+o2l4 0
+o3coarse 1
+o3fine 0
+o3det 1
+o3lvl 99
+o3vel 0
+o3rs 2
+o3kls 0
+o3r1 77
+o3r2 76
+o3r3 82
+o3r4 71
+o3l1 99
+o3l2 98
+o3l3 98
+o3l4 0
+o4coarse 1
+o4fine 0
+o4det -1
+o4lvl 98
+o4vel 0
+o4rs 2
+o4kls 0
+o4r1 77
+o4r2 76
+o4r3 82
+o4r4 71
+o4l1 99
+o4l2 98
+o4l3 98
+o4l4 0
+o5coarse 1
+o5fine 0
+o5det 2
+o5lvl 98
+o5vel 0
+o5rs 2
+o5kls 0
+o5r1 77
+o5r2 36
+o5r3 41
+o5r4 71
+o5l1 99
+o5l2 98
+o5l3 98
+o5l4 0
+o6coarse 1
+o6fine 0
+o6det 0
+o6lvl 82
+o6vel 2
+o6rs 2
+o6kls 0
+o6r1 49
+o6r2 99
+o6r3 28
+o6r4 68
+o6l1 98
+o6l2 98
+o6l3 91
+o6l4 0
+## BASS
+alg 15
+fb 6
+mono 1
+porta 0.08
+o1coarse 0
+o1fine 0
+o1det 0
+o1lvl 99
+o1vel 2
+o1rs 2
+o1kls 0
+o1r1 95
+o1r2 62
+o1r3 30
+o1r4 70
+o1l1 99
+o1l2 80
+o1l3 0
+o1l4 0
+o2coarse 0
+o2fine 0
+o2det 0
+o2lvl 75
+o2vel 4
+o2rs 2
+o2kls 0
+o2r1 95
+o2r2 70
+o2r3 40
+o2r4 70
+o2l1 99
+o2l2 70
+o2l3 0
+o2l4 0
+o3coarse 1
+o3fine 0
+o3det 0
+o3lvl 78
+o3vel 5
+o3rs 2
+o3kls 0
+o3r1 99
+o3r2 60
+o3r3 40
+o3r4 70
+o3l1 99
+o3l2 60
+o3l3 0
+o3l4 0
+o4coarse 5
+o4fine 0
+o4det 0
+o4lvl 60
+o4vel 6
+o4rs 2
+o4kls 0
+o4r1 99
+o4r2 80
+o4r3 50
+o4r4 70
+o4l1 99
+o4l2 0
+o4l3 0
+o4l4 0
+o5coarse 1
+o5fine 0
+o5det 0
+o5lvl 70
+o5vel 3
+o5rs 2
+o5kls 0
+o5r1 99
+o5r2 55
+o5r3 30
+o5r4 70
+o5l1 99
+o5l2 50
+o5l3 0
+o5l4 0
+o6coarse 1
+o6fine 0
+o6det 0
+o6lvl 65
+o6vel 0
+o6rs 2
+o6kls 0
+o6r1 99
+o6r2 60
+o6r3 30
+o6r4 70
+o6l1 99
+o6l2 40
+o6l3 0
+o6l4 0
+## BELLS
+alg 4
+fb 4
+o1coarse 1
+o1fine 0
+o1det 2
+o1lvl 95
+o1vel 2
+o1rs 2
+o1kls 0
+o1r1 99
+o1r2 30
+o1r3 25
+o1r4 30
+o1l1 99
+o1l2 60
+o1l3 0
+o1l4 0
+o2coarse 3
+o2fine 50
+o2det 0
+o2lvl 76
+o2vel 3
+o2rs 2
+o2kls 0
+o2r1 98
+o2r2 12
+o2r3 71
+o2r4 50
+o2l1 99
+o2l2 0
+o2l3 32
+o2l4 0
+o3coarse 1
+o3fine 0
+o3det -3
+o3lvl 92
+o3vel 0
+o3rs 2
+o3kls 0
+o3r1 99
+o3r2 28
+o3r3 25
+o3r4 30
+o3l1 99
+o3l2 55
+o3l3 0
+o3l4 0
+o4coarse 3
+o4fine 50
+o4det 2
+o4lvl 72
+o4vel 0
+o4rs 2
+o4kls 0
+o4r1 98
+o4r2 12
+o4r3 71
+o4r4 50
+o4l1 99
+o4l2 0
+o4l3 32
+o4l4 0
+o5coarse 1
+o5fine 0
+o5det 5
+o5lvl 85
+o5vel 0
+o5rs 2
+o5kls 0
+o5r1 99
+o5r2 25
+o5r3 25
+o5r4 30
+o5l1 99
+o5l2 50
+o5l3 0
+o5l4 0
+o6coarse 6
+o6fine 23
+o6det 0
+o6lvl 66
+o6vel 0
+o6rs 2
+o6kls 0
+o6r1 99
+o6r2 40
+o6r3 30
+o6r4 40
+o6l1 99
+o6l2 0
+o6l3 0
+o6l4 0
+## STRINGS
+alg 0
+fb 5
+lspd 30
+ldel 40
+lpmd 8
+pms 3
+o1coarse 1
+o1fine 0
+o1det 2
+o1lvl 99
+o1vel 0
+o1rs 2
+o1kls 0
+o1r1 45
+o1r2 30
+o1r3 20
+o1r4 40
+o1l1 99
+o1l2 92
+o1l3 90
+o1l4 0
+o2coarse 1
+o2fine 0
+o2det 0
+o2lvl 75
+o2vel 0
+o2rs 2
+o2kls 0
+o2r1 55
+o2r2 30
+o2r3 20
+o2r4 40
+o2l1 99
+o2l2 90
+o2l3 85
+o2l4 0
+o3coarse 1
+o3fine 0
+o3det -3
+o3lvl 99
+o3vel 0
+o3rs 2
+o3kls 0
+o3r1 42
+o3r2 30
+o3r3 20
+o3r4 40
+o3l1 99
+o3l2 92
+o3l3 90
+o3l4 0
+o4coarse 1
+o4fine 0
+o4det 0
+o4lvl 78
+o4vel 0
+o4rs 2
+o4kls 0
+o4r1 55
+o4r2 30
+o4r3 20
+o4r4 40
+o4l1 99
+o4l2 90
+o4l3 85
+o4l4 0
+o5coarse 2
+o5fine 0
+o5det 0
+o5lvl 60
+o5vel 0
+o5rs 2
+o5kls 0
+o5r1 60
+o5r2 30
+o5r3 20
+o5r4 40
+o5l1 99
+o5l2 85
+o5l3 80
+o5l4 0
+o6coarse 1
+o6fine 0
+o6det 0
+o6lvl 55
+o6vel 0
+o6rs 2
+o6kls 0
+o6r1 60
+o6r2 30
+o6r3 20
+o6r4 40
+o6l1 99
+o6l2 85
+o6l3 80
+o6l4 0
+
+# dr8
+## 808 BOOM BAP
+t0kit 0
+t1kit 0
+t2kit 0
+t3kit 0
+t4kit 0
+t5kit 0
+t6kit 0
+t7kit 0
+t0dec 0.75
+pat 0 2000000100200000
+pat 1 0000200000002000
+pat 2 0000000000000000
+pat 3 1010101110101010
+pat 4 0000000000000010
+pat 5 0000000000000000
+pat 6 0000000000000100
+pat 7 0000000000000000
+swing 0.25
+## 909 HOUSE
+t0kit 1
+t1kit 1
+t2kit 1
+t3kit 1
+t4kit 1
+t5kit 1
+t6kit 1
+t7kit 1
+pat 0 2000100020001000
+pat 1 0000000000000000
+pat 2 0000100000001000
+pat 3 0010001000100010
+pat 4 0000000000000000
+pat 5 0000000000000000
+pat 6 0000000000000000
+pat 7 0000000000000000
+## LINN POP
+t0kit 2
+t1kit 2
+t2kit 2
+t3kit 2
+t4kit 2
+t5kit 2
+t6kit 2
+t7kit 2
+pat 0 2000001020000000
+pat 1 0000200000002000
+pat 2 0000000000000000
+pat 3 1111111111111111
+pat 4 0000000000000000
+pat 5 0000000000000000
+pat 6 0000000000000000
+pat 7 0000000000000000
+## TECHNO
+t0kit 3
+t1kit 3
+t2kit 3
+t3kit 3
+t4kit 3
+t5kit 3
+t6kit 3
+t7kit 3
+t0drv 0.35
+t0dec 0.6
+pat 0 2000200020002000
+pat 1 0000000000000000
+pat 2 0000100000001000
+pat 3 1011101110111011
+pat 4 0010001000100010
+pat 5 0000000000000000
+pat 6 0000000001000000
+pat 7 0000000000000000
+## ELECTRO
+t0kit 4
+t1kit 4
+t2kit 4
+t3kit 4
+t4kit 4
+t5kit 4
+t6kit 4
+t7kit 4
+pat 0 2000000200100000
+pat 1 0000200000002000
+pat 2 0000000000002000
+pat 3 1010101010101010
+pat 4 0000000000000000
+pat 5 0010000000100000
+pat 6 0000000100000000
+pat 7 0000001000000010
+
+# sp64
+## KIT
+gcut 0
+## LO-FI
+tune -2
+gcut -0.3
+gdec -0.15
+## TIGHT
+gdec -0.6
+## BIG ROOM
+tune -1
+gdec 0.5
+## HI-FI UP
+tune 3
+gcut 0.3
+
+# dfam
+## DFAM KIT
+accent 0.5
+## TRIBAL
+pat 0 2001001020010010
+pat 1 0000000000000000
+pat 2 0000000000000000
+pat 3 0010100100101001
+pat 4 0000000000000000
+pat 5 0100000001000000
+pat 6 0000000000000000
+pat 7 0000000000000000
+t3spa 0.6
+pit 3 0 0.3 0 -0.2 0.5 0 0 0.3 0 -0.4 0 0.2 0 0 0.5 0
+swing 0.2
+## ACID LINE
+pat 0 2000100020001000
+pat 1 0000000000000000
+pat 2 0000000000000000
+pat 3 0000000000000000
+pat 4 0000000000000000
+pat 5 0000000000000000
+pat 6 2112112121121121
+pat 7 0000000000000000
+t6res 0.75
+t6cut 0.3
+t6feg 0.7
+t6fdec 0.25
+pit 6 0 0 0.5 0 0.25 0 -0.25 0 0 0.75 0 0.5 0 0.25 0 -0.5
+## INDUSTRIAL
+t0noise 0.3
+t0fm 0.4
+t0res 0.35
+pat 0 2000200000202000
+pat 1 0000200100002000
+pat 2 1111111111111111
+pat 3 0000000000000000
+pat 4 0001000000010000
+pat 5 0010001000100010
+pat 6 0000000000000000
+pat 7 0100000001000000
+t5fm 0.9
+## BLEEPS
+pat 0 2000000020000000
+pat 1 0000000000000000
+pat 2 0101010101010101
+pat 3 0000000000000000
+pat 4 0000000000000000
+pat 5 0000000000000000
+pat 6 0000000000000000
+pat 7 1011010110110101
+t7spa 0.8
+t7res 0.5
+pit 7 0 0.5 0 0.25 0.75 0 0.5 0 0 0.25 0 1 0.5 0 0.75 0.25
+
+# line
+## CLEAN
+lvl 1
+## DUB FILTER
+ftype 1
+cut 0.5
+res 0.55
+m0src 1
+m0dst 2
+m0amt 0.3
+l0rate 0.25
+## TRANCE GATE
+lvl 0.5
+s0dst 7
+s0amt 1
+s0_0 1
+s0_1 -1
+s0_2 1
+s0_3 1
+s0_4 -1
+s0_5 1
+s0_6 -1
+s0_7 1
+s0_8 1
+s0_9 -1
+s0_10 1
+s0_11 1
+s0_12 -1
+s0_13 1
+s0_14 -1
+s0_15 -1
+## TELEPHONE
+mode 1
+ftype 3
+cut 0.55
+res 0.35
+locut 0.6
+drive 0.45
+## NOISE GATE
+gmode 2
+thr -45
+att 0.02
+rel 0.25

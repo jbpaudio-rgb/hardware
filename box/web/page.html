@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Octavio Synth — simulateur</title>
+<style>
+:root { --bg:#141416; --box:#0a0a0b; --deck:#060607; --cap:#111113; --txt:#f2f2f2; --dim:#8a8a8e; --line:#26262a; }
+* { box-sizing: border-box; }
+html, body { margin:0; background:var(--bg); color:var(--txt); font-family: "DejaVu Sans Condensed", "Arial Narrow", system-ui, sans-serif; }
+body { min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:18px 12px 28px; gap:14px; }
+#stage { width:min(1232px, 100%); flex-shrink:0; }
+#scaler { width:1232px; height:652px; transform-origin:0 0; position:relative; }
+#box { position:absolute; inset:0; border-radius:24px; background:var(--box);
+  box-shadow: 0 1px 0 #2a2a2e inset, 0 30px 60px rgba(0,0,0,.55), 0 0 0 1px #000; overflow:hidden; }
+.abs { position:absolute; }
+/* the L-shaped recessed deck around the buttons */
+.deck { position:absolute; background:var(--deck); box-shadow: 0 2px 6px rgba(0,0,0,.8) inset, 0 -1px 0 #1b1b1e inset; }
+#logo { color:#fff; }
+#bezel { background:#050506; box-shadow:0 0 0 1px #000, inset 0 0 0 1px #2a2a2e; }
+#screen { position:absolute; width:441.6px; height:248.4px; display:block; image-rendering:auto; cursor:pointer; touch-action:none; background:#000; }
+.cap { position:absolute; border-radius:7px; background:linear-gradient(#18181b,#0e0e10); box-shadow: 0 2px 0 #000, 0 0 0 1px #000, 0 1px 0 #2a2a2e inset;
+  color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; user-select:none; cursor:pointer; touch-action:none; }
+.cap.down { transform:translateY(2px); box-shadow: 0 0 0 1px #000, 0 1px 0 #222 inset; background:#0c0c0e; }
+.led { position:absolute; width:11px; height:11px; margin:-5.5px 0 0 -5.5px; border-radius:50%; background:#111; box-shadow:0 0 0 1px #000; }
+.enc { position:absolute; border-radius:50%; cursor:ns-resize; touch-action:none; user-select:none;
+  background: radial-gradient(circle at 50% 35%, #2a2a2e, #101012 70%); box-shadow: 0 4px 10px rgba(0,0,0,.7), 0 0 0 1px #000, 0 1px 0 #3a3a3e inset; }
+.enc .mark { position:absolute; left:50%; top:6%; width:3px; height:30%; margin-left:-1.5px; border-radius:2px; background:#e8e8e8; transform-origin:50% 147%; }
+.enc.big .mark { top:7%; height:28%; transform-origin:50% 155%; }
+.ring i { position:absolute; width:8px; height:8px; margin:-4px 0 0 -4px; border-radius:50%; background:#0d0d0e; box-shadow:0 0 0 1px #000; }
+.lbl { position:absolute; color:#fff; font-weight:700; font-size:15px; line-height:1; letter-spacing:.04em; text-align:center; transform:translate(-50%, -50%); white-space:nowrap; }
+#bar { width:min(1232px, 100%); display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; justify-content:space-between; }
+button.start { font:inherit; font-weight:700; font-size:16px; letter-spacing:.04em; color:#000; background:#28d25a; border:0; border-radius:10px; padding:11px 20px; cursor:pointer; }
+button.start.on { background:#222226; color:var(--dim); cursor:default; }
+.info { color:var(--dim); font-size:14px; line-height:1.45; }
+.info b { color:var(--txt); font-weight:700; }
+#keys { position:relative; height:86px; width:min(1232px, 100%); user-select:none; touch-action:none; }
+#keys div { position:absolute; top:0; border-radius:0 0 6px 6px; cursor:pointer; }
+#keys .w { height:86px; background:#e9e9ea; box-shadow:0 0 0 1px #000 inset; }
+#keys .b { height:52px; background:#111; z-index:2; box-shadow:0 0 0 1px #000; }
+#keys .on.w { background:#9fe8b4; } #keys .on.b { background:#28d25a; }
+.off #screen { visibility:hidden; } .off .ring i, .off .led { background:#0d0d0e !important; box-shadow:0 0 0 1px #000 !important; }
+.pill { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:3px 10px; margin-left:6px; color:var(--dim); font-size:13px; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="scaler"><div id="box"></div></div></div>
+
+<div id="cal" class="info" style="display:none;width:min(1232px,100%)">
+  <b>Calibrer la taille réelle</b> : pose une carte bancaire sur l'écran contre la barre et ajuste jusqu'à ce qu'elle ait la même longueur (85,6 mm)
+  <button class="pill" onclick="calibrate(1/1.01)">−</button><button class="pill" onclick="calibrate(1.01)">+</button>
+  <div id="card" style="height:14px;margin-top:6px;border-radius:3px;background:#28d25a"></div>
+</div>
+<div id="bar">
+  <div style="display:flex;align-items:center;gap:14px">
+    <button class="start" id="start">▶ Démarrer le son</button>
+    <span class="info" id="midi">MIDI : —</span>
+    <button class="start" id="real" style="background:#2a2a2e;color:#f2f2f2" title="Le boîtier à sa vraie taille : 30,8 x 16,3 cm">Taille : fenêtre</button>
+    <button class="start" id="ab" title="Compare le son actuel avec celui d'avant la passe d'amélioration">A/B : son actuel</button>
+    <button class="start" id="linein" style="background:#2a2a2e;color:#f2f2f2" title="L'entrée de l'ordinateur (micro, carte son) joue dans les parties réglées sur LINE IN">🎤 Entrée ligne : non</button>
+    <label class="info" style="cursor:pointer">📁 <b>Carte SD</b> : ajouter des sons <input type="file" id="sdin" multiple accept="audio/*,.wav" style="display:none"> <span class="pill" id="sdn">0 son</span></label>
+  </div>
+  <div class="info">
+    <b>Encodeurs</b> : glisser ou molette, cliquer = appuyer · <b>Écran</b> : toucher, glisser un réglage, double-toucher = défaut<br>
+    <b>Clavier</b> : A W S E D F T G Y H U J K joue la partie choisie · Z / X octave <span class="pill" id="oct">octave 4</span>
+  </div>
+</div>
+<div id="keys"></div>
+
+<script>
+// Octavio Synth in the browser: the synth's own C++ (box/Box.h, Panel.h, ui/Screen.h) compiled to WebAssembly.
+// This page draws the front panel; it talks to the synth with the real panel's USB-MIDI protocol (facade-fw/PROTOCOLE.md).
+const WASM_B64 = "__WASM__", FONT_R = "__FONTR__", FONT_B = "__FONTB__";
+const LOGO = `__LOGO__`;
+
+function b64(s) { const bin = atob(s); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+const wasmBytes = b64(WASM_B64);
+const imports = () => { const o = {}; return new Proxy(o, { get: (t, k) => k === 'proc_exit' ? () => 0 : () => 8 }); };
+const WORKLET = `
+let X = null;
+class P extends AudioWorkletProcessor {
+  constructor(o) { super();
+    const mod = new WebAssembly.Module(o.processorOptions.bytes); const w = {};
+    for (const i of WebAssembly.Module.imports(mod)) w[i.name] = i.name === 'proc_exit' ? () => 0 : () => 8;
+    X = new WebAssembly.Instance(mod, { wasi_snapshot_preview1: w }).exports; X._initialize();
+    this.h = X.ob_new(sampleRate, 0); this.c = 0;
+    this.port.onmessage = e => { const m = e.data;
+      if (m.t === 'smp') { const n = m.L ? m.L.length : 0, pL = n ? X.ob_alloc(n * 4) : 0, pR = n && m.R ? X.ob_alloc(n * 4) : 0;
+        if (n) { new Float32Array(X.memory.buffer, pL, n).set(m.L); if (pR) new Float32Array(X.memory.buffer, pR, n).set(m.R); }
+        X.ob_sampleSet(this.h, m.part, m.slot, pL, pR, n, m.sr || 48000, m.empty ? 1 : 0); if (pL) X.ob_free(pL); if (pR) X.ob_free(pR); return; }
+      if (m.t === 'msgs') { const f = m.f; for (let k = 0; k < f.length; k += 8) X.ob_apply(this.h, f[k], f[k+1], f[k+2], f[k+3], f[k+4], f[k+5], f[k+6], f[k+7]); }
+      else if (m.t === 'ab') X.ob_classic(m.on ? 1 : 0);
+      else if (m.t === 'midi') X.ob_midi(this.h, m.b[0], m.b[1] || 0, m.b[2] || 0, m.b.length, m.at || 0); };
+    this.port.postMessage('ready'); }
+  process(i, o) {
+    const inp = i[0];
+    if (inp && inp.length) { new Float32Array(X.memory.buffer, X.ob_inLeft(this.h), 128).set(inp[0]); new Float32Array(X.memory.buffer, X.ob_inRight(this.h), 128).set(inp[1] || inp[0]); X.ob_processIn(this.h, 128); }
+    else X.ob_process(this.h, 128);
+    const L = new Float32Array(X.memory.buffer, X.ob_left(this.h), 128), R = new Float32Array(X.memory.buffer, X.ob_right(this.h), 128);
+    o[0][0].set(L); if (o[0][1]) o[0][1].set(R);
+    if (++this.c >= 6) { this.c = 0; this.port.postMessage({ m: Array.from(new Float32Array(X.memory.buffer, X.ob_meters(this.h), 99)),
+      s: new Float32Array(new Float32Array(X.memory.buffer, X.ob_scopeTail(this.h, 768), 1536)) }); }
+    return true; } }
+registerProcessor('octavio-box', P);`;
+
+// ---------------- the panel's layout, to scale: the enclosure's own numbers (box/enclosure/enclosure.cpp, in mm on the
+// panel, the case's outside from -4 to 304 x -4 to 159: 308 x 163 mm), drawn at K = 4 pixels per mm (1232 x 652) ----------------
+const K = 4, mx = x => (x + 4) * K, my = y => (y + 4) * K;
+const box = document.getElementById('box');
+const el = (tag, cls, css, parent = box) => { const e = document.createElement(tag); if (cls) e.className = cls; Object.assign(e.style, css || {}); parent.appendChild(e); return e; };
+const px = v => v + 'px';
+const rbox = (cls, x0, y0, x1, y1, r) => el('div', cls, { left: px(mx(x0)), top: px(my(y0)), width: px((x1 - x0) * K), height: px((y1 - y0) * K), borderRadius: px(r * K) });
+// the L-shaped recessed deck: the page-button row, joined to the part buttons, knob 9 and the volume pot
+rbox('deck', 7.0, 118.0, 284.0, 146.0, 4); rbox('deck', 166.0, 86.5, 284.0, 146.0, 4);
+el('div', 'deck', { left: px(mx(158.0)), top: px(my(110)), width: px(8.25 * K), height: px(8.5 * K), boxShadow: 'none',
+  WebkitMaskImage: `radial-gradient(circle at 0 0, transparent ${8 * K}px, #000 ${8 * K + 1}px)`, maskImage: `radial-gradient(circle at 0 0, transparent ${8 * K}px, #000 ${8 * K + 1}px)` });
+// the display's glass, flush with the panel (143.4 x 91.46 mm, Touch Display 2
+// 5"), with its active area centred in it (110.4 x 62.1 mm)
+
+const bezel = rbox('abs', 83.75 - 71.7, 61.75 - 45.73, 83.75 + 71.7, 61.75 + 45.73, 5); bezel.id = 'bezel';
+const canvas = document.createElement('canvas'); canvas.id = 'screen'; canvas.width = 1280; canvas.height = 720;
+Object.assign(canvas.style, { left: px(16.5 * K), top: px(14.68 * K) }); bezel.appendChild(canvas);
+const ctx2d = canvas.getContext('2d');
+
+// the 8 encoders (30 x 38 mm apart), their 12-LED rings (r = 11 mm)
+const ENC_X = [0, 1, 2, 3].map(c => mx(180 + 30 * c)), ENC_Y = [0, 1].map(r => my(30 + 38 * r)), ENC_D = 16 * K, RING_R = 11 * K;
+const encs = [], rings = [];
+function ring(cx, cy) { const r = el('div', 'ring abs', { left: 0, top: 0 }); const leds = [];
+  for (let k = 0; k < 12; k++) { const a = (15 + 30 * k) * Math.PI / 180; leds.push(el('i', '', { left: px(cx + RING_R * Math.cos(a)), top: px(cy + RING_R * Math.sin(a)) }, r)); }
+  return leds; }
+function encoder(k, cx, cy, d, big) {
+  const e = el('div', 'enc' + (big ? ' big' : ''), { left: px(cx - d / 2), top: px(cy - d / 2), width: px(d), height: px(d) });
+  const mark = el('div', 'mark', {}, e); let angle = 0;
+  e.turn = n => { angle += n * 15; mark.style.transform = `rotate(${angle}deg)`; };
+  return e; }
+for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) { const k = r * 4 + c; encs[k] = encoder(k, ENC_X[c], ENC_Y[r], ENC_D); rings[k] = ring(ENC_X[c], ENC_Y[r]); }
+// keycaps 17.5 x 16.5 mm: the part buttons under the encoders (LEDs 10.5 mm above), the 10 page buttons 19 mm apart
+const partLeds = [], pageLeds = [];
+const cap = (cx, cy) => ({ left: px(mx(cx - 8.75)), top: px(my(cy - 8.25)), width: px(17.5 * K), height: px(16.5 * K) });
+for (let t = 0; t < 4; t++) {
+  const x = 180 + 30 * t; const b = el('div', 'cap', { ...cap(x, 100), fontSize: px(6 * K * 1.25) }); b.textContent = t + 1;
+  partLeds[t] = el('div', 'led', { left: px(mx(x)), top: px(my(89.5)) });
+  hold(b, 32 + t);
+}
+const PAGES = ['ENGINE', 'VOICE', '+', 'FILTER', 'ENV', 'MOD', 'SEQ', 'FX', 'MIXER', 'KEYS'];
+for (let k = 0; k < 10; k++) {
+  const x = 21.5 + 19 * k;
+  const b = el('div', 'cap', { ...cap(x, 132), fontSize: px(2.3 * K * 1.3), letterSpacing: '.02em' });
+  b.textContent = PAGES[k]; if (PAGES[k] === '+') b.style.fontSize = px(6 * K);
+  if (PAGES[k] === 'KEYS') {   // the keyboard button: a little piano drawn on its cap (enclosure/inscriptions.py), 13 x 6.5 mm
+    let r = ''; const G = ["##########################", "#...###..###...#...###...#", "#...###..###...#...###...#", "#...###..###...#...###...#", "#...###..###...#...###...#", "#...###..###...#...###...#", "#...###..###...#...###...#", "#...###..###...#...###...#", "#....#....#....#....#....#", "#....#....#....#....#....#", "#....#....#....#....#....#", "#....#....#....#....#....#", "##########################"];
+    G.forEach((row, y) => [...row].forEach((c, x) => { if (c === '#') r += `<rect x="${x}" y="${y}" width="1.02" height="1.02"/>`; }));
+    b.innerHTML = `<svg viewBox="0 0 26 13" style="width:${13 * K}px;height:${6.5 * K}px" fill="#fff" shape-rendering="crispEdges">${r}</svg>`;
+  }
+  pageLeds[k] = el('div', 'led', { left: px(mx(x)), top: px(my(121.5)) });
+  hold(b, 16 + k);
+}
+// knob 9 and the volume pot, with their white labels (box/enclosure/inscriptions.py)
+const K9 = { x: mx(232), y: my(132) }, POT = { x: mx(272), y: my(132) };
+encs[8] = encoder(8, K9.x, K9.y, 20 * K, true);
+const potEl = encoder(9, POT.x, POT.y, 13 * K); potEl.style.cursor = 'ns-resize';
+// SINECRAFT in pixel lettering (0.7 mm pixels, enclosure/inscriptions.py), where OCTAVIO was (now on the back)
+{ const G = [".####.###.#...#.#####..####.####...###..#####.#####", "#......#..##..#.#.....#.....#...#.#...#.#.......#..", "#......#..#.#.#.#.....#.....#...#.#...#.#.......#..", ".###...#..#..##.####..#.....####..#####.####....#..", "....#..#..#...#.#.....#.....#.#...#...#.#.......#..", "....#..#..#...#.#.....#.....#..#..#...#.#.......#..", "####..###.#...#.#####..####.#...#.#...#.#.......#.."], P = 0.7, W = G[0].length, H = G.length;
+  let r = ''; G.forEach((row, y) => [...row].forEach((c, x) => { if (c === '#') r += `<rect x="${x}" y="${y}" width="1.02" height="1.02"/>`; }));
+  el('div', 'abs', { left: px(mx(83.75 - W * P / 2)), top: px(my(5.9 - H * P / 2)), width: px(W * P * K), height: px(H * P * K) })
+    .innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" fill="#fff" shape-rendering="crispEdges">${r}</svg>`; }
+el('div', 'lbl', { left: px(POT.x), top: px(my(149.6)), fontSize: px(3 * K * 1.3) }).textContent = 'VOLUME';
+
+// ---------------- the synth: one copy here (panel + screen), one in the AudioWorklet (sound) ----------------
+let U = null, H = 0, node = null, actx = null, ready = false; const pending = [];
+const mem = () => U.memory.buffer;
+function cstr(p) { const m = new Uint8Array(mem()); let e = p; while (m[e]) e++; return new TextDecoder().decode(m.subarray(p, e)); }
+function putStr(s) { const b = new TextEncoder().encode(s + '\0'); const p = U.ob_alloc(b.length); new Uint8Array(mem(), p, b.length).set(b); return p; }
+const now = () => performance.now() / 1000;
+
+async function init() {
+  const { instance } = await WebAssembly.instantiate(wasmBytes, { wasi_snapshot_preview1: imports() });
+  U = instance.exports; U._initialize(); H = U.ob_new(48000, 1);
+  const load = s => { const b = b64(s); const p = U.ob_alloc(b.length); new Uint8Array(mem(), p, b.length).set(b); return [p, b.length]; };
+  const [r, nr] = load(FONT_R), [bd, nb] = load(FONT_B); U.ob_fonts(H, r, nr, bd, nb);
+  try { for (const l of (localStorage.getItem('octavio-box-sync') || '').split('\n')) if (l) { const a = putStr(l); U.ob_command(H, a); U.ob_free(a); } } catch (e) {}
+  try { const saved = JSON.parse(localStorage.getItem('octavio-box-multis') || '{}');
+    for (const k in saved) { const a = putStr(k), b = putStr(saved[k]); U.ob_presetPut(H, a, b); U.ob_free(a); U.ob_free(b); } } catch (e) {}
+  requestAnimationFrame(frame);
+}
+
+function panelIn(b0, b1, b2) { if (U && powered !== false) U.ob_panelIn(H, b0, b1, b2, now()); }
+function midiIn(bytes, at) {   // at: when (seconds, performance.now() / 1000)
+  if (!U || powered === false) return; at = at || now(); U.ob_midi(H, bytes[0], bytes[1] || 0, bytes[2] || 0, bytes.length, at);
+  if (ready) node.port.postMessage({ t: 'midi', b: Array.from(bytes), at });
+}
+function flush() {   // the changes made here, to the sound
+  const np = U.ob_alloc(4); const p = U.ob_outbox(H, np); const n = new Int32Array(mem(), np, 1)[0]; U.ob_free(np);
+  if (n) { const f = new Float32Array(new Float32Array(mem(), p, n * 8)); if (ready) node.port.postMessage({ t: 'msgs', f }); else pending.push(f); }
+}
+
+// ---------------- the SAMPLER's sounds: a virtual SD card (WAV / audio files added here), handed to the sound ----------------
+const sdFiles = new Map();   // name -> { L, R, sr }
+function samples() {
+  for (;;) { const r = cstr(U.ob_sampleReq(H)); if (!r) break; const [ps, name] = [r.slice(0, r.indexOf('|')), r.slice(r.indexOf('|') + 1)];
+    const part = Math.floor(+ps / 64), slot = +ps % 64, f = sdFiles.get(name);
+    const msg = f ? { t: 'smp', part, slot, L: f.L, R: f.R, sr: f.sr } : { t: 'smp', part, slot, empty: name === '-' };
+    if (f) { const p = U.ob_alloc(f.L.length * 4); new Float32Array(mem(), p, f.L.length).set(f.L); U.ob_setPeaks(H, +ps, p, f.L.length); U.ob_free(p); }
+    if (ready) node.port.postMessage(msg); else pendingSmp.push(msg); } }
+const pendingSmp = [];
+async function addFiles(files) {
+  const ac = new OfflineAudioContext(1, 1, 48000);
+  for (const file of files) { try { const b = await ac.decodeAudioData(await file.arrayBuffer());
+      sdFiles.set(file.name, { L: b.getChannelData(0).slice(), R: b.numberOfChannels > 1 ? b.getChannelData(1).slice() : null, sr: b.sampleRate });
+      const a = putStr(file.name); U.ob_sdAdd(H, a); U.ob_free(a); } catch (e) { console.warn(file.name, e); } }
+  document.getElementById('sdn').textContent = sdFiles.size + ' son' + (sdFiles.size > 1 ? 's' : '');
+}
+document.getElementById('sdin').addEventListener('change', e => addFiles([...e.target.files]));
+document.getElementById('real').addEventListener('click', () => setReal(!realSize));
+let abOld = false;   // A/B: the sound as it was before the improvement pass, to compare by ear
+document.getElementById('ab').addEventListener('click', () => { abOld = !abOld; const b = document.getElementById('ab');
+  b.textContent = abOld ? 'A/B : ancien son' : 'A/B : son actuel'; b.style.opacity = abOld ? .65 : 1;
+  if (ready) node.port.postMessage({ t: 'ab', on: abOld }); });
+
+// ---------------- the LEDs, from the panel protocol ----------------
+const ringState = Array.from({ length: 8 }, () => ({ v: 0, mode: 3, c: [0, 0, 0] }));
+const ARC = [4, 5, 6, 7, 8, 9, 10, 11, 0, 1], BOTTOM = [2, 3];
+function ringLevels(r) {   // the same as the panel firmware (facade-fw/main.c, ring_levels)
+  const lv = new Array(10).fill(0), v = r.v / 127, cl = x => Math.max(0, Math.min(1, x));
+  if (r.mode === 0) { const l = v * 10; for (let i = 0; i < 10; i++) lv[i] = cl(l - i); }
+  else if (r.mode === 1) { const p = v * 9, a = Math.floor(p), f = p - a; lv[a] = 1 - f; if (a < 9) lv[a + 1] = f; }
+  else if (r.mode === 2) { const d = (r.v - 64) / 63 * 5;
+    if (d >= 0) for (let i = 5; i < 10; i++) lv[i] = cl(d - (i - 5)); else for (let i = 4; i >= 0; i--) lv[i] = cl(-d - (4 - i));
+    if (r.v === 64) lv[4] = lv[5] = .3; }
+  return lv; }
+const colour = (c, k) => `rgb(${Math.round(c[0] * 2 * k)},${Math.round(c[1] * 2 * k)},${Math.round(c[2] * 2 * k)})`;
+const glow = (c, k) => k > .25 ? `0 0 ${4 + 8 * k}px ${colour(c, .9 * k)}, 0 0 0 1px #000` : '0 0 0 1px #000';
+function drawRing(k) { const r = ringState[k], leds = rings[k];
+  if (r.mode === 3) { leds.forEach(l => { l.style.background = '#0d0d0e'; l.style.boxShadow = '0 0 0 1px #000'; }); return; }
+  const lv = ringLevels(r);
+  for (let i = 0; i < 10; i++) { const kk = .06 + .94 * lv[i]; const l = leds[ARC[i]]; l.style.background = colour(r.c, kk); l.style.boxShadow = glow(r.c, lv[i]); }
+  for (const b of BOTTOM) { leds[b].style.background = colour(r.c, .15); leds[b].style.boxShadow = '0 0 0 1px #000'; } }
+function setLed(j, rgb) { const l = j < 4 ? partLeds[j] : pageLeds[j - 4]; if (!l) return;
+  const k = Math.max(...rgb) / 127; l.style.background = rgb.every(x => x < 8) ? '#111' : `rgb(${rgb[0] * 2},${rgb[1] * 2},${rgb[2] * 2})`;
+  l.style.boxShadow = k > .4 ? `0 0 10px rgb(${rgb[0] * 2},${rgb[1] * 2},${rgb[2] * 2}), 0 0 0 1px #000` : '0 0 0 1px #000'; }
+function panelOut() {
+  const np = U.ob_alloc(4); const p = U.ob_panelOut(H, np); const n = new Int32Array(mem(), np, 1)[0]; U.ob_free(np);
+  const b = new Uint8Array(mem(), p, n).slice(); const dirty = new Set();
+  for (let i = 0; i < b.length;) {
+    if (b[i] === 0xF0) { let e = i; while (e < b.length && b[e] !== 0xF7) e++; const m = b.subarray(i + 1, e);
+      if (m[0] === 0x7D && m[1] === 0x4F && m[2] === 0x10 && m[3] < 8) { const r = ringState[m[3]]; r.v = m[4]; r.c = [m[5], m[6], m[7]]; r.mode = m[8] & 3; dirty.add(m[3]); }
+      if (m[0] === 0x7D && m[1] === 0x4F && m[2] === 0x11) setLed(m[3] - 96, [m[4], m[5], m[6]]);
+      i = e + 1; }
+    else if (b[i] === 0xBF) { if (b[i + 1] >= 16 && b[i + 1] < 24) { ringState[b[i + 1] - 16].v = b[i + 2]; dirty.add(b[i + 1] - 16); } i += 3; }
+    else i++;
+  }
+  dirty.forEach(drawRing);
+}
+
+// ---------------- the loop: 30 pictures a second ----------------
+let last = 0, lastSync = null; const img = new ImageData(1280, 720);
+function frame(t) {
+  requestAnimationFrame(frame);
+  if (t - last < 32) return; last = t;
+  const p = U.ob_render(H, now());
+  img.data.set(new Uint8Array(mem(), p, 1280 * 720 * 4)); ctx2d.putImageData(img, 0, 0);
+  panelOut(); flush(); samples();
+  const sy = cstr(U.ob_syncLines(H)); if (sy !== lastSync) { lastSync = sy; try { localStorage.setItem('octavio-box-sync', sy); } catch (e) {} }
+  const s = U.ob_lastSaved(H); const name = cstr(s);
+  if (name) { try { const all = JSON.parse(localStorage.getItem('octavio-box-multis') || '{}'); const a = putStr(name);
+    all[name] = cstr(U.ob_presetGet(H, a)); U.ob_free(a); localStorage.setItem('octavio-box-multis', JSON.stringify(all)); } catch (e) {} }
+}
+
+// ---------------- input: knobs, buttons, the screen, the keyboard, MIDI ----------------
+function hold(b, note) {
+  b.addEventListener('pointerdown', e => { e.preventDefault(); b.setPointerCapture(e.pointerId); b.classList.add('down'); panelIn(0x9F, note, 127); });
+  const up = () => { if (!b.classList.contains('down')) return; b.classList.remove('down'); panelIn(0x8F, note, 0); };
+  b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); }
+function knobInput(e, k) {   // drag up / down or wheel = turn (CC 16+k, relative), click = push (note k)
+  let y0 = 0, acc = 0, moved = false;
+  const turn = d => { if (!d) return; panelIn(0xBF, 16 + k, d > 0 ? Math.min(63, d) : 128 + Math.max(-63, d)); e.turn(d); };
+  let held = null, long = false;   // DÉFILER held 2 s: the machine on / off, as on the box
+  e.addEventListener('pointerdown', ev => { ev.preventDefault(); e.setPointerCapture(ev.pointerId); y0 = ev.clientY; acc = 0; moved = false; long = false;
+    if (k === 8) held = setTimeout(() => { if (!moved) { long = true; power(!powered); } }, 2000); });
+  e.addEventListener('pointermove', ev => { if (!e.hasPointerCapture(ev.pointerId)) return; const dy = (y0 - ev.clientY) / scale; y0 = ev.clientY;
+    acc += dy / 5; if (Math.abs(acc) >= 1) { moved = true; const d = Math.trunc(acc); acc -= d; turn(d); } });
+  e.addEventListener('pointerup', ev => { clearTimeout(held); if (!moved && !long) { panelIn(0x9F, k, 127); setTimeout(() => panelIn(0x8F, k, 0), 60); } });
+  e.addEventListener('wheel', ev => { ev.preventDefault(); turn(ev.deltaY < 0 ? 1 : -1); }, { passive: false }); }
+encs.forEach((e, k) => knobInput(e, k));
+// the machine off: dark screen and LEDs, no sound, the panel ignored (but DÉFILER held 2 s switches it back on)
+var powered = true;
+function power(on) {
+  powered = on; box.classList.toggle('off', !on);
+  if (actx) { if (on) actx.resume(); else actx.suspend(); }
+  if (!on) { const off = document.getElementById('offmsg'); off.style.opacity = 1; } else document.getElementById('offmsg').style.opacity = 0;
+}
+el('div', 'abs', { left: px(mx(83.75 - 55.2)), top: px(my(61.75 - 31.05)), width: px(110.4 * K), height: px(62.1 * K), display: 'flex', alignItems: 'center', justifyContent: 'center',
+  color: '#3a3a3e', fontWeight: 700, fontSize: '22px', letterSpacing: '.06em', pointerEvents: 'none', opacity: 0, transition: 'opacity .3s' }).id = 'offmsg';
+document.getElementById('offmsg').textContent = 'OFF · hold the big knob 2 s';
+// the volume pot: absolute, CC 7
+let potV = 95; const potMark = potEl.firstChild;
+const potShow = () => potMark.style.transform = `rotate(${-135 + 270 * potV / 127}deg)`; potShow();
+{ let y0 = 0;
+  potEl.addEventListener('pointerdown', ev => { ev.preventDefault(); potEl.setPointerCapture(ev.pointerId); y0 = ev.clientY; });
+  potEl.addEventListener('pointermove', ev => { if (!potEl.hasPointerCapture(ev.pointerId)) return; const dy = (y0 - ev.clientY) / scale; y0 = ev.clientY;
+    const v = Math.max(0, Math.min(127, potV + dy / 2)); if (Math.round(v) !== Math.round(potV)) panelIn(0xBF, 7, Math.round(v)); potV = v; potShow(); });
+  potEl.addEventListener('wheel', ev => { ev.preventDefault(); potV = Math.max(0, Math.min(127, potV + (ev.deltaY < 0 ? 4 : -4))); panelIn(0xBF, 7, Math.round(potV)); potShow(); }, { passive: false }); }
+// the touch screen
+function screenXY(ev) { const r = canvas.getBoundingClientRect(); return [(ev.clientX - r.left) / r.width * 1280, (ev.clientY - r.top) / r.height * 720]; }
+canvas.addEventListener('pointerdown', ev => { ev.preventDefault(); if (!powered) return; canvas.setPointerCapture(ev.pointerId); const [x, y] = screenXY(ev); U.ob_touch(H, 0, x, y, now()); });
+canvas.addEventListener('pointermove', ev => { if (!canvas.hasPointerCapture(ev.pointerId)) return; const [x, y] = screenXY(ev); U.ob_touch(H, 1, x, y, now()); });
+canvas.addEventListener('pointerup', ev => { const [x, y] = screenXY(ev); U.ob_touch(H, 2, x, y, now()); });
+
+// notes: the computer keyboard and the keys under the panel play the selected part (MIDI channel 16, which no part listens to)
+let octave = 4; const held = new Set();
+function note(n, on) { if (n < 0 || n > 127) return; midiIn(on ? [0x9F, n, 100] : [0x8F, n, 0]); const k = keyEls[n - lowKey()]; if (k) k.classList.toggle('on', on); }
+const MAP = 'awsedftgyhujkolp;';
+addEventListener('keydown', e => { if (e.repeat || e.metaKey || e.ctrlKey) return; const c = e.key.toLowerCase();
+  if (c === 'z' || c === 'x') { octave = Math.max(1, Math.min(7, octave + (c === 'x' ? 1 : -1))); document.getElementById('oct').textContent = 'octave ' + octave; buildKeys(); return; }
+  if (c >= '1' && c <= '4') { panelIn(0x9F, 32 + (+c - 1), 127); panelIn(0x8F, 32 + (+c - 1), 0); return; }
+  const i = MAP.indexOf(c); if (i < 0) return; const n = 12 * (octave + 1) + i; held.add(c + ':' + n); note(n, true); });
+addEventListener('keyup', e => { const c = e.key.toLowerCase(); for (const h of [...held]) { const [k, n] = h.split(':'); if (k === c) { held.delete(h); note(+n, false); } } });
+// the on-screen keys: two octaves
+const keysEl = document.getElementById('keys'); let keyEls = [];
+const lowKey = () => 12 * (octave + 1);
+function buildKeys() {
+  keysEl.innerHTML = ''; keyEls = []; const W = keysEl.clientWidth, whites = 15, ww = W / whites; let wi = 0;
+  for (let i = 0; i < 25; i++) { const pc = i % 12, black = [1, 3, 6, 8, 10].includes(pc); const d = document.createElement('div');
+    if (black) { d.className = 'b'; Object.assign(d.style, { left: px(wi * ww - ww * .32), width: px(ww * .64) }); }
+    else { d.className = 'w'; Object.assign(d.style, { left: px(wi * ww), width: px(ww - 1) }); wi++; }
+    const n = lowKey() + i;
+    d.addEventListener('pointerdown', e => { e.preventDefault(); d.setPointerCapture(e.pointerId); note(n, true); });
+    d.addEventListener('pointerup', () => note(n, false)); d.addEventListener('pointercancel', () => note(n, false));
+    keysEl.appendChild(d); keyEls.push(d); } }
+
+// Web MIDI: every input plays the synth (channels, CCs, clock as on the hardware)
+if (navigator.requestMIDIAccess) navigator.requestMIDIAccess().then(acc => {
+  const hook = () => { const names = []; acc.inputs.forEach(i => { names.push(i.name);
+    i.onmidimessage = m => { if (m.data[0] !== 0xFE) midiIn(Array.from(m.data), (m.timeStamp || performance.now()) / 1000); }; });
+    document.getElementById('midi').textContent = names.length ? 'MIDI : ' + names.join(', ') : 'MIDI : aucun appareil'; };
+  hook(); acc.onstatechange = hook; }).catch(() => document.getElementById('midi').textContent = 'MIDI : non autorisé');
+else document.getElementById('midi').textContent = 'MIDI : pas dans ce navigateur';
+
+// the sound starts on a click (browsers ask for one)
+document.getElementById('start').addEventListener('click', async e => {
+  const b = e.currentTarget; if (actx) return; b.textContent = 'Démarrage…';
+  actx = new AudioContext({ latencyHint: 'interactive' });
+  const url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));
+  await actx.audioWorklet.addModule(url);
+  node = new AudioWorkletNode(actx, 'octavio-box', { numberOfInputs: 1, channelCount: 2, channelCountMode: 'explicit', outputChannelCount: [2], processorOptions: { bytes: wasmBytes.buffer.slice(0) } });
+  U.ob_setRate(H, actx.sampleRate);
+  node.port.onmessage = m => { if (m.data === 'ready') { pending.forEach(f => node.port.postMessage({ t: 'msgs', f })); pending.length = 0; pendingSmp.forEach(m => node.port.postMessage(m)); pendingSmp.length = 0; ready = true; if (abOld) node.port.postMessage({ t: 'ab', on: true }); return; }
+    const v = m.data.m; U.ob_setMeters(H, v[0], v[1], v[2], v[3], v[4]);
+    { const fp = U.ob_alloc(99 * 4); new Float32Array(mem(), fp, 99).set(v); U.ob_fromSound(H, fp); U.ob_free(fp); } if (v[6] || v[7] || v[8] || v[9]) U.ob_padHits(H, v[6], v[7], v[8], v[9]);
+    const sp = U.ob_alloc(1536 * 4); new Float32Array(mem(), sp, 1536).set(m.data.s); U.ob_scopePush(H, sp, 768); U.ob_free(sp); };
+  node.connect(actx.destination); await actx.resume();
+  b.textContent = '♪ Son actif'; b.classList.add('on');
+});
+
+// the line input: the computer's audio input (no echo cancelling nor gain control), into the synth's LINE IN parts
+let lineSrc = null;
+document.getElementById('linein').addEventListener('click', async e => {
+  const b = e.currentTarget;
+  if (lineSrc) { lineSrc.disconnect(); lineSrc.mediaStream.getTracks().forEach(t => t.stop()); lineSrc = null; b.textContent = '🎤 Entrée ligne : non'; b.classList.remove('on'); return; }
+  if (!actx) document.getElementById('start').click();
+  while (!node) await new Promise(r => setTimeout(r, 50));
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 2 } });
+    lineSrc = actx.createMediaStreamSource(st); lineSrc.connect(node); b.textContent = '🎤 Entrée ligne : oui'; b.classList.add('on');
+  } catch (err) { b.textContent = '🎤 Entrée ligne : refusée'; }
+});
+
+// fit the panel to the window
+// two ways: fitted to the window, or at the box's real size (308 x 163 mm). A CSS millimetre is only right on some
+// screens, so the real size can be calibrated: a bank card (85.6 mm) held on the screen against the bar
+let scale = 1, realSize = false, pxPerMm = 96 / 25.4;
+try { realSize = localStorage.getItem('octavio-box-real') === '1'; const c = parseFloat(localStorage.getItem('octavio-box-pxmm')); if (c > 1) pxPerMm = c; } catch (e) {}
+function fit() {
+  const st = document.getElementById('stage');
+  if (realSize) { scale = pxPerMm / K; st.style.width = px(1232 * scale); st.style.alignSelf = 1232 * scale > innerWidth - 24 ? 'flex-start' : ''; }
+  else { st.style.width = ''; st.style.alignSelf = ''; scale = Math.min(1, st.clientWidth / 1232); }
+  const s = document.getElementById('scaler'); s.style.transform = `scale(${scale})`; st.style.height = px(652 * scale); buildKeys();
+  const b = document.getElementById('real'); if (b) b.textContent = realSize ? 'Taille : réelle' : 'Taille : fenêtre';
+  const cal = document.getElementById('cal'); if (cal) { cal.style.display = realSize ? '' : 'none'; document.getElementById('card').style.width = px(85.6 * pxPerMm); }
+}
+function setReal(on) { realSize = on; try { localStorage.setItem('octavio-box-real', on ? '1' : '0'); } catch (e) {} fit(); }
+function calibrate(f) { pxPerMm = Math.max(1, pxPerMm * f); try { localStorage.setItem('octavio-box-pxmm', String(pxPerMm)); } catch (e) {} fit(); }
+addEventListener('resize', fit); fit();
+init();
+</script>
+</body>
+</html>

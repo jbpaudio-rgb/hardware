@@ -1,0 +1,7 @@
+build/
+third_party/
+!box/third_party/
+*.user
+.DS_Store
+node_modules/
+fxrender

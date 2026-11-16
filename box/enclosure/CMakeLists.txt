@@ -1,0 +1,10 @@
+# Octavio Synth enclosure generator. Needs the Manifold library (https://github.com/elalish/manifold):
+#   cmake -S box/enclosure -B build-encl -DMANIFOLD_DIR=/path/to/manifold   (source tree, built in its build/)
+#   cmake --build build-encl && (cd box/enclosure && ../../build-encl/octavio-enclosure)
+cmake_minimum_required(VERSION 3.16)
+project(OctavioEnclosure CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(MANIFOLD_DIR "" CACHE PATH "Manifold source tree (with build/src/libmanifold.a)")
+add_executable(octavio-enclosure enclosure.cpp)
+target_include_directories(octavio-enclosure PRIVATE ${MANIFOLD_DIR}/include)
+target_link_libraries(octavio-enclosure PRIVATE ${MANIFOLD_DIR}/build/src/libmanifold.a)
