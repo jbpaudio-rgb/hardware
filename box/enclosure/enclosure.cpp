@@ -41,6 +41,7 @@ constexpr double SCREEN_DEPTH = 14.92;                   // glass top -> end of 
 constexpr double PIPOST_FROM_END = 33.91;                // FPC-end glass edge -> first row of Pi posts
 constexpr double OPEN_HX = RH_L / 2 + std::fabs(GL - RH_L - 2 * RH_END) / 2 + 1;   // opening under the glass, half sizes
 constexpr double OPEN_HY = RH_W / 2 + 1;
+constexpr double USB_X = 180, USB_EARS = 18;               // rear panel USB-C (SparkFun CAB-15455): centre x, M3 spacing
 constexpr double SD_X = 152, SD_EARS = 23;                // rear panel microSD slot: centre x, screw hole spacing
 constexpr double SCREEN_GAP = 0.6;                       // posts -> bridge: the glass bottoms on its ledge first
 constexpr double PI_BOSS = 4;                            // floor bosses under the Pi
@@ -219,7 +220,10 @@ int main() {
     for (double jy : jackY) cut += rearHole(piX(jy - 0.9), zHat + 2.6, 6.6);
     cut += rearHole(205, FLOOR + 18, 9.6);                                            // LINE OUT L (1/4" panel jack)
     cut += rearHole(222, FLOOR + 18, 9.6);                                            // LINE OUT R
-    cut += rearSlot(180, FLOOR + 12, 12, 6.5);                                        // USB-C power (panel-mount extension)
+    // USB-C (power + data): SparkFun CAB-15455 panel-mount extension, screwed on from behind: a slot for the plug,
+    // two M3 holes 18 mm apart (the cable's own spacing)
+    cut += rearSlot(USB_X, FLOOR + 12, 12, 6.5);
+    for (double ux : { USB_X - USB_EARS / 2, USB_X + USB_EARS / 2 }) cut += rearHole(ux, FLOOR + 12, 3.3);
     // the microSD card: the Pi's slot is out of reach inside, so a panel-mount microSD extension brings it to the back
     // (a slot for the card, two M2.5 holes for the extension's ears; check their spacing on the one bought: SD_EARS)
     cut += rearSlot(SD_X, FLOOR + 12, 14, 3);

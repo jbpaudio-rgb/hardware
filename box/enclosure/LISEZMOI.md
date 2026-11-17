@@ -62,7 +62,7 @@ Les cotes de la façade reprennent celles de la carte de façade (`fpb/design.py
 Chaque prise a son nom écrit au-dessus, en blanc incrusté de 0,6 mm (dans `octavio-inscriptions.stl`, avec les autres inscriptions), à l'endroit quand on regarde l'arrière.
 1. **MIDI IN, MIDI OUT, LINE IN, PHONES :** trous de 6,6 mm alignés sur les jacks 3,5 mm du HAT. MIDI IN, MIDI OUT et LINE IN sont espacés de 13 mm de centre à centre. Le devant des jacks affleure le bord du HAT, et leur nez traverse le mur d'environ 1,2 mm.
 2. **OUT R, OUT L :** trous de 9,6 mm pour deux jacks 6,35 mm mono à visser (par exemple Switchcraft 11), reliés à J2 sur le HAT.
-3. **POWER (USB-C) :** fente de 12 × 6,5 mm pour une rallonge USB-C à fixer sur le panneau. La rallonge va jusqu'au port d'alimentation du Pi, qui est tourné vers l'intérieur.
+3. **POWER (USB-C) :** fente de 12 × 6,5 mm et deux trous M3 à 18 mm d'entraxe, pour la rallonge de panneau SparkFun CAB-15455 (15 cm, alimentation et données), vissée de l'intérieur avec ses deux vis M3. La rallonge va jusqu'au port USB-C du Pi, qui est tourné vers l'intérieur. Elle sert à brancher l'alimentation et à transférer des fichiers depuis un ordinateur.
 4. **SD CARD :** fente de 14 × 3 mm et deux trous M2,5 à 23 mm d'entraxe, pour une rallonge microSD à visser sur panneau (environ 15 cm). La fente du Pi est inaccessible une fois le boîtier fermé (sous le Pi, à environ 2 cm du mur arrière) : la rallonge s'y branche et ramène la carte à l'arrière, pour changer de carte ou y copier des sons. Vérifie l'entraxe des oreilles de celle que tu achètes (`SD_EARS` dans `enclosure.cpp`). N'enlève jamais la carte quand la machine est allumée : c'est elle qui fait démarrer le Pi.
 
 Le logo OCTAVIO est au milieu de la partie libre du panneau arrière, à gauche des prises vu de derrière.
@@ -81,7 +81,7 @@ Le boîtier n'a plus de fentes d'aération (ni derrière, ni sur le côté, ni d
   - 4 entretoises M2,5 mâle-femelle de 11 mm, plus 4 vis M2,5 × 6 pour le HAT.
   - Un dissipateur passif pour Pi 5, de 7 mm de haut au plus.
   - Le connecteur 2×20 femelle standard du HAT (8,5 mm).
-- **Câbles :** une rallonge USB-C à fixer sur un panneau, une rallonge microSD à visser sur panneau (environ 15 cm, avec 2 vis M2,5), et un câble JST PH à 3 fils (pas de 2 mm) entre J2 et les deux jacks de sortie.
+- **Câbles :** une rallonge USB-C de panneau SparkFun CAB-15455 (vis M3 fournies), une rallonge microSD à visser sur panneau (environ 15 cm, avec 2 vis M2,5), et un câble JST PH à 3 fils (pas de 2 mm) entre J2 et les deux jacks de sortie.
 - **Boutons d'encodeur :** 18 mm de diamètre au plus, sinon ils cachent les LED des anneaux (qui sont à 11 mm du centre).
 - **Pieds :** 4 pieds caoutchouc de 12 mm. Le fond a des creux pour les placer.
 
@@ -89,7 +89,7 @@ Le boîtier n'a plus de fentes d'aération (ni derrière, ni sur le côté, ni d
 - **Hauteur des boutons Choc avec leurs capuchons :** les creux supposent que le dessus du capuchon est à 8,8 mm au-dessus de la carte. Mesure tes vrais capuchons : la valeur `CHOC_TOP` en haut de `enclosure.cpp` règle la profondeur des creux.
 - **Bande de test :** imprimer d'abord un morceau de façade (un encodeur, un bouton, un coin de la poche de l'écran) pour vérifier les tolérances de ton imprimante.
 - **Impression de la poche de l'écran :** le capot s'imprime façade contre le plateau, donc le rebord sous la vitre est en porte-à-faux au-dessus de la poche (0,7 mm de haut). Active des supports seulement dans la poche (supports touchant le plateau). Le dessous du rebord est caché sous la vitre, son aspect n'a pas d'importance.
-- **Rallonge USB-C :** sa découpe dépend du modèle choisi.
+- **Rallonge USB-C :** la découpe est faite pour la SparkFun CAB-15455 (trous à 18 mm). Un autre modèle à oreilles M3 de 18 mm convient aussi.
 - **Température du Pi sans ventilateur :** jouer un preset lourd sur les 4 parties pendant 15 à 20 minutes, boîtier fermé, et lire `vcgencmd measure_temp`. Sous 75 °C environ, c'est bon. Sinon, remettre des fentes d'aération (elles existaient dans une version précédente du générateur) ou ajouter un petit ventilateur de 30 mm à basse vitesse.
 
 ## Modifier le boîtier
