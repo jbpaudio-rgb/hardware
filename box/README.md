@@ -19,7 +19,7 @@ cmake --build build-box
 ./build-box/octavio-box
 ```
 
-Raspberry Pi OS: `sudo apt install cmake g++ libasound2-dev`, then the same three lines.
+Raspberry Pi OS: `sudo apt install cmake g++ libasound2-dev`, then the same three lines. Or all at once (packages, code in `~/hardware`, build, screen lines in `config.txt`, services that start at power-on): `curl -sL https://raw.githubusercontent.com/jbpaudio-rgb/hardware/main/box/systeme/installer.sh | bash`, then `sudo reboot`.
 
 Options: `--buffer 128` (samples per block), `--rate 48000`, `--device n` (see `devices`), `--script file`
 (commands run at start, for example a saved state).
