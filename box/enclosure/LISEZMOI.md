@@ -63,9 +63,10 @@ Chaque prise a son nom écrit au-dessus, en blanc incrusté de 0,6 mm (dans `oct
 1. **MIDI IN, MIDI OUT, LINE IN, PHONES :** trous de 6,6 mm alignés sur les jacks 3,5 mm du HAT. MIDI IN, MIDI OUT et LINE IN sont espacés de 13 mm de centre à centre. Le devant des jacks affleure le bord du HAT, et leur nez traverse le mur d'environ 1,2 mm.
 2. **OUT R, OUT L :** trous de 9,6 mm pour deux jacks 6,35 mm mono à visser (par exemple Switchcraft 11), reliés à J2 sur le HAT.
 3. **POWER (USB-C) :** fente de 12 × 6,5 mm et deux trous M3 à 18 mm d'entraxe, pour la rallonge de panneau SparkFun CAB-15455 (15 cm, alimentation et données), vissée de l'intérieur avec ses deux vis M3. La rallonge va jusqu'au port USB-C du Pi, qui est tourné vers l'intérieur. Elle sert à brancher l'alimentation et à transférer des fichiers depuis un ordinateur.
-4. **SD CARD :** fente de 14 × 3 mm et deux trous M2,5 à 23 mm d'entraxe, pour une rallonge microSD à visser sur panneau (environ 15 cm). La fente du Pi est inaccessible une fois le boîtier fermé (sous le Pi, à environ 2 cm du mur arrière) : la rallonge s'y branche et ramène la carte à l'arrière, pour changer de carte ou y copier des sons. Vérifie l'entraxe des oreilles de celle que tu achètes (`SD_EARS` dans `enclosure.cpp`). N'enlève jamais la carte quand la machine est allumée : c'est elle qui fait démarrer le Pi.
 
 Le logo OCTAVIO est au milieu de la partie libre du panneau arrière, à gauche des prises vu de derrière.
+
+La carte microSD reste dans le Pi. Les sons et les samples passent par le câble USB-C (page `octavio.local`). Pour changer ou réécrire la carte, on ouvre le fond.
 
 Le boîtier n'a plus de fentes d'aération (ni derrière, ni sur le côté, ni dans le fond).
 
@@ -81,7 +82,7 @@ Le boîtier n'a plus de fentes d'aération (ni derrière, ni sur le côté, ni d
   - 4 entretoises M2,5 mâle-femelle de 11 mm, plus 4 vis M2,5 × 6 pour le HAT.
   - Un dissipateur passif pour Pi 5, de 7 mm de haut au plus.
   - Le connecteur 2×20 femelle standard du HAT (8,5 mm).
-- **Câbles :** une rallonge USB-C de panneau SparkFun CAB-15455 (vis M3 fournies), une rallonge microSD à visser sur panneau (environ 15 cm, avec 2 vis M2,5), et un câble JST PH à 3 fils (pas de 2 mm) entre J2 et les deux jacks de sortie.
+- **Câbles :** une rallonge USB-C de panneau SparkFun CAB-15455 (vis M3 fournies), et un câble JST PH à 3 fils (pas de 2 mm) entre J2 et les deux jacks de sortie.
 - **Boutons d'encodeur :** 18 mm de diamètre au plus, sinon ils cachent les LED des anneaux (qui sont à 11 mm du centre).
 - **Pieds :** 4 pieds caoutchouc de 12 mm. Le fond a des creux pour les placer.
 

@@ -42,7 +42,6 @@ constexpr double PIPOST_FROM_END = 33.91;                // FPC-end glass edge -
 constexpr double OPEN_HX = RH_L / 2 + std::fabs(GL - RH_L - 2 * RH_END) / 2 + 1;   // opening under the glass, half sizes
 constexpr double OPEN_HY = RH_W / 2 + 1;
 constexpr double USB_X = 180, USB_EARS = 18;               // rear panel USB-C (SparkFun CAB-15455): centre x, M3 spacing
-constexpr double SD_X = 152, SD_EARS = 23;                // rear panel microSD slot: centre x, screw hole spacing
 constexpr double SCREEN_GAP = 0.6;                       // posts -> bridge: the glass bottoms on its ledge first
 constexpr double PI_BOSS = 4;                            // floor bosses under the Pi
 constexpr double PI_STANDOFF = 11;                       // Pi -> HAT: standard 8.5 mm socket, passive heatsink <= 7 mm
@@ -224,10 +223,8 @@ int main() {
     // two M3 holes 18 mm apart (the cable's own spacing)
     cut += rearSlot(USB_X, FLOOR + 12, 12, 6.5);
     for (double ux : { USB_X - USB_EARS / 2, USB_X + USB_EARS / 2 }) cut += rearHole(ux, FLOOR + 12, 3.3);
-    // the microSD card: the Pi's slot is out of reach inside, so a panel-mount microSD extension brings it to the back
-    // (a slot for the card, two M2.5 holes for the extension's ears; check their spacing on the one bought: SD_EARS)
-    cut += rearSlot(SD_X, FLOOR + 12, 14, 3);
-    for (double sx : { SD_X - SD_EARS / 2, SD_X + SD_EARS / 2 }) cut += rearHole(sx, FLOOR + 12, 2.7);
+    // (no microSD slot: the card stays in the Pi; files go over the USB-C cable, and the card is reached by opening the
+    // bottom)
     // (no vents: the box runs cool enough without them)
 
     shell -= cut;

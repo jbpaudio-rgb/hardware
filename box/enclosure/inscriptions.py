@@ -10,8 +10,8 @@ import numpy as np, os, re
 # Octavio logo (web/octavio-app/logo-only.svg, straight segments only) on the rear wall, in the middle of the free part
 # left of the connectors (seen from the front; on the right seen from behind). On the top, where the logo was (between the
 # case edge and the glass), SINECRAFT in small letters.
-LOGO_SVG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "web", "octavio-app", "logo-only.svg")
-REAR_FREE = (2.0, 135.0)                        # case x: past the corner post .. before the microSD slot's screws (139)
+LOGO_SVG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo-octavio.svg")
+REAR_FREE = (2.0, 166.0)                        # case x: past the corner post .. before the USB-C's left screw (171)
 LOGO_CX, LOGO_W = sum(REAR_FREE) / 2, 70.0
 LOGO_CZ = 24.0                                  # logo centre height: middle of the wall (3 .. 45)
 
@@ -153,7 +153,6 @@ REAR = [
     ("MIDI IN",    285.9, 29.6, 2.0), ("MIDI OUT", 272.9, 29.6, 2.0), ("LINE IN", 259.9, 29.6, 2.0), ("PHONES", 242.6, 29.6, 2.0),
     ("OUT L",      205.0, 28.6, 2.4), ("OUT R", 222.0, 28.6, 2.4),   # LINE OUT L, R (from behind, L is on the right)
     ("POWER",      180.0, 20.8, 2.4),
-    ("SD CARD",    152.0, 18.6, 2.4),   # the microSD extension's slot (enclosure.cpp SD_X)
 ]
 mirror = lambda loops, cx: [np.column_stack([2 * cx - l[:, 0], l[:, 1]])[::-1] for l in loops]
 with open("arriere.txt", "w") as f:
