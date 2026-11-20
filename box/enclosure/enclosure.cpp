@@ -5,6 +5,7 @@
 //   octavio-inscriptions.stl  white labels inlaid in the panel (second filament, same origin as the capot)
 //   octavio-capuchon-*.stl    raised Choc v1 keycap, three leg thicknesses to try
 //   octavio-capuchons-*-plaque.stl + octavio-capuchons-texte.stl  the 14 caps with their white labels
+//   octavio-bouton-test-*.stl, octavio-boutons-*-plaque.stl + octavio-boutons-traits.stl  the 10 knobs (3 bore sizes)
 //
 // Coordinates follow the front-panel board ("panel" mm): x to the right, y towards the player,
 // so the front-panel parts are placed with the same numbers as in fpb/design.py.
@@ -406,6 +407,42 @@ int main() {
         }
         std::printf("capuchons: %.1f mm de haut, %.1f mm au-dessus de la facade, %.1f mm au-dessus du creux\n",
                     T - (P - 3.0), CAP_RAISE, CAP_RAISE + WELL);
+    }
+    {   // --- the knobs, printed: 8 x 18 mm (the encoders with LED rings), 22 mm (knob 9), 14 mm (volume); knurled, a
+        // chamfered top with a white line, a D bore for the 6 mm flatted shafts (4.5 mm across the flat). Printed top
+        // on the plate (smooth top, bore upwards, no supports). The bore's fit depends on the printer: a test knob
+        // per bore size (6.00 / 6.10 / 6.20), then the plate with the one that holds without forcing.
+        auto knob = [](double d, double H, double bore, Manifold* line) {
+            const double r = d / 2, ch = 1.0;
+            Manifold k = Manifold::Cylinder(H - ch, r, r, 96) + Manifold::Cylinder(ch, r, r - ch, 96).Translate({0, 0, H - ch});
+            const int n = d > 20 ? 30 : d > 16 ? 24 : 18;   // knurls
+            for (int i = 0; i < n; ++i) { const double a = 2 * M_PI * i / n;
+                k -= Manifold::Cylinder(H - ch - 1.5, 0.7, 0.7, 16).Translate({(r + 0.35) * std::cos(a), (r + 0.35) * std::sin(a), 1.5}); }
+            const double depth = H - 2.0;   // the shaft's bore, from the bottom; the top 2 mm stay solid
+            Manifold b = Manifold::Cylinder(depth, bore / 2, bore / 2, 48) - Manifold::Cube({bore, bore, depth}).Translate({-bore / 2, 4.5 - bore / 2 + (bore - 6.0) / 2, 0});
+            k -= b;
+            k -= Manifold::Cylinder(0.6, bore / 2 + 0.6, bore / 2, 48);   // a chamfer at the bore's mouth
+            // the white line on top, on the flat's side (for the endless encoders it is only a mark)
+            Manifold l = Manifold::Cube({1.2, r - ch - r * 0.3, 0.6}).Translate({-0.6, r * 0.3, H - 0.6});
+            k -= l; if (line) *line = l;
+            return k;
+        };
+        auto flip = [](const Manifold& m, double H, double x, double y) { return m.Rotate(180, 0, 0).Translate({x, y, H}); };
+        for (double bore : {6.00, 6.10, 6.20}) {
+            char name[64]; std::snprintf(name, sizeof name, "octavio-bouton-test-%.2f.stl", bore);
+            writeStl(flip(knob(14, 14, bore, nullptr), 14, 0, 0), name);
+            Manifold plate, lines;
+            struct K { double d, H; } ks[10] = {{18, 16}, {18, 16}, {18, 16}, {18, 16}, {18, 16}, {18, 16}, {18, 16}, {18, 16}, {22, 16}, {14, 14}};
+            for (int i = 0; i < 10; ++i) {
+                const double x = (i % 5) * 26.0, y = (i / 5) * 26.0; Manifold l;
+                plate += flip(knob(ks[i].d, ks[i].H, bore, &l), ks[i].H, x, y);
+                lines += flip(l, ks[i].H, x, y);
+            }
+            std::snprintf(name, sizeof name, "octavio-boutons-%.2f-plaque.stl", bore);
+            writeStl(plate, name);
+            if (bore == 6.10) writeStl(lines, "octavio-boutons-traits.stl");
+        }
+        std::printf("boutons: 8 x 18 mm, 22 mm, 14 mm ; alesage en D de 6 mm (essais 6.00 / 6.10 / 6.20)\n");
     }
     std::printf("creux autour des boutons: %.1f mm (facade %.1f mm a cet endroit), capuchons Choc standard %.1f mm au-dessus du fond du creux\n",
                 WELL, PANEL - WELL, (ZP - BOARD_GAP + CHOC_TOP) - (ZTOP - WELL));
