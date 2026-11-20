@@ -19,7 +19,7 @@ if [ -d "$SRC/.git" ]; then git -C "$SRC" pull -q --ff-only; else git clone -q -
 
 echo "== 3/5 compilation (quelques minutes la premiere fois)"
 cmake -S "$SRC/box" -B "$B" -DCMAKE_BUILD_TYPE=Release -DOCTAVIO_SDL=OFF >/dev/null
-cmake --build "$B" -j4 2>&1 | grep -E "error|Built target" || true
+cmake --build "$B" -j2 2>&1 | grep -E "error|Built target" || true   # -j2: fits in a 1 GB Pi (main.cpp takes ~500 MB to compile)
 [ -x "$B/octavio-box" ] || { echo "La compilation a echoue."; exit 1; }
 
 echo "== 4/5 ecran et droits"
