@@ -18,6 +18,10 @@ Sans imprimante multicolore / no multi-colour printer: imprimer le noir seul ; l
 
 ## Essais d'abord / test pieces first
 
+- façade / front : `octavio-test-facade.stl` (60 × 95 mm, façade contre le plateau / front face down) : un coin de la
+  poche de l'écran, un encodeur et ses trous de LED, un bouton de partie, trois boutons de page. Vérifier que l'encodeur,
+  les capuchons et la vitre y entrent / check that the encoder, the keycaps and the glass fit;
+
 Les ajustements dépendent de l'imprimante. Imprimer d'abord ces petites pièces et garder la taille qui tient sans forcer :
 fits depend on the printer. Print these small pieces first and keep the size that holds without forcing:
 

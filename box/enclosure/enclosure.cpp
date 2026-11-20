@@ -5,6 +5,7 @@
 //   octavio-inscriptions.stl  white labels inlaid in the panel (second filament, same origin as the capot)
 //   octavio-capuchon-*.stl    raised Choc v1 keycap, three leg thicknesses to try
 //   octavio-capuchons-*-plaque.stl + octavio-capuchons-texte.stl  the 14 caps with their white labels
+//   octavio-test-facade.stl   a 60 x 95 mm piece of the front to check the fits first
 //   octavio-bouton-test-*.stl, octavio-boutons-*-plaque.stl + octavio-boutons-traits.stl  the 10 knobs (3 bore sizes)
 //
 // Coordinates follow the front-panel board ("panel" mm): x to the right, y towards the player,
@@ -373,6 +374,11 @@ int main() {
     writeStl(plate, "octavio-fond.stl");
     writeStl(frame.Translate({0, 0, -FZ0}), "octavio-cadre.stl");
     writeStl(labels, "octavio-inscriptions.stl");
+    {   // a test strip of the front, to check the printer's fits before the whole case: a corner of the screen pocket
+        // and its ledge, an encoder with its LED ring holes, a part button and three page-button openings, 12 mm deep
+        const Manifold cut = box(140, 50, 200, 145, ZTOP - 12, ZTOP + 1);
+        writeStl(shell ^ cut, "octavio-test-facade.stl");
+    }
     std::printf("ouvertures des capuchons: jeu de %.2f mm, cloison de %.2f mm entre deux boutons de page, %.2f mm vers les LED\n",
                 CAP_GAP, 19 - 17.5 - 2 * CAP_GAP, (132 - 8.25 - CAP_GAP) - (121.5 + 1.0));
     std::printf("inscriptions: %.0f mm3, %.1f mm de profondeur\n", labels.Volume(), INLAY);
