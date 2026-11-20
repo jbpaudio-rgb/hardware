@@ -35,6 +35,13 @@ for P in quiet loglevel=0 logo.nologo vt.global_cursor_default=0 systemd.show_st
 done
 sudo sed -i '1s/console=tty1/console=tty3/' "$CMD"
 sudo systemctl disable -q getty@tty1 2>/dev/null || true
+# a faster start: what a synth does not need at power-on. cloud-init only applies Imager's settings on the very first
+# start (done by now); the others wait for the network or tidy up in the background.
+sudo touch /etc/cloud/cloud-init.disabled 2>/dev/null || true
+for S in NetworkManager-wait-online.service systemd-networkd-wait-online.service ModemManager.service \
+         apt-daily.timer apt-daily-upgrade.timer man-db.timer e2scrub_reap.service rpi-eeprom-update.service; do
+    sudo systemctl disable -q "$S" 2>/dev/null || true
+done
 sudo usermod -aG video,input,audio,render "$U"
 # no sound card of its own yet (the HAT not mounted): the sound goes to the HDMI screen that is plugged in, through
 # ALSA's hdmi plugin (the Pi's HDMI only takes IEC958 frames). With the HAT, its card is used and this file is removed.
