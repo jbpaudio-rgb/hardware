@@ -14,6 +14,7 @@
 #include "Wav.h"
 #include "ui/Display.h"
 #include "ui/Screen.h"
+#include "ui/Splash.h"
 #ifndef OCTAVIO_NO_DEVICES
 #include "third_party/rtaudio/RtAudio.h"
 #include "third_party/rtmidi/RtMidi.h"
@@ -326,7 +327,7 @@ static void writeWav(const std::string& file, const std::vector<float>& s, int r
 
 int main(int argc, char** argv) {
     int rate = 48000, phones = 48, rotate = 90, screenMode = -1; unsigned buffer = 128, device = 0, inDevice = 0; float zoom = 1;
-    bool noInput = false; std::string lineFile;
+    bool noInput = false, splashOnly = false; std::string lineFile;
     int threads = -1;   // helper threads for the parts (-1: the cores minus 2, at most 3: 2 on the Pi 5)
     std::string renderTo, first, serial = "/dev/ttyAMA2", fonts = OCTAVIO_FONT_DIR;
     std::string presets = std::string(std::getenv("HOME") ? std::getenv("HOME") : ".") + "/octavio";
@@ -345,14 +346,27 @@ int main(int argc, char** argv) {
         else if (s == "--screen") screenMode = 1;
         else if (s == "--no-screen") screenMode = 0;
         else if (s == "--rotate") rotate = std::stoi(next());
+        else if (s == "--splash") splashOnly = true;
         else if (s == "--zoom") zoom = std::stof(next());
         else if (s == "--fonts") fonts = next();
         else if (s == "--threads") threads = std::stoi(next());
         else { std::printf("octavio-box [--rate 48000] [--buffer 128] [--device n] [--input n|off] [--script file] [--render out.wav]\n"
                            "            [--line-in file.wav (what LINE IN plays in a --render)]\n"
                            "            [--serial /dev/ttyAMA2] [--presets dir] [--phones 0-63]\n"
-                           "            [--screen | --no-screen] [--rotate 90|270] [--zoom 1] [--fonts dir] [--threads 0-3]\n"); return 1; }
+                           "            [--screen | --no-screen] [--rotate 90|270] [--zoom 1] [--fonts dir] [--threads 0-3]\n"
+                           "            [--splash (only the start-up picture, until stopped: octavio-splash.service)]\n"); return 1; }
     }
+#ifndef OCTAVIO_NO_DEVICES
+    if (splashOnly) {   // while Linux starts: the picture on the display, held until octavio-box takes over (stops us)
+        ui::Canvas c(1280, 720); ui::drawSplash(c);
+        for (int k = 0; k < 100; ++k) {   // the display driver may still be loading: try for 20 s
+            std::string why; auto d = ui::openDrm(rotate, why);
+            if (d) { d->show(c); d->show(c); for (;;) std::this_thread::sleep_for(std::chrono::seconds(60)); }
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+        return 1;
+    }
+#endif
     std::printf("Octavio: building the 4 parts...\n");
     Box box(rate); Cpu cpu;
 
@@ -544,7 +558,11 @@ int main(int argc, char** argv) {
             if (!desktop) display = ui::openDrm(rotate, why);
             if (!display) display = ui::openSdl(zoom, why2);
 #endif
-            if (display) { g_screen = &screen; std::printf("screen: %s\n", display->name()); }
+            if (display) {
+                g_screen = &screen; std::printf("screen: %s\n", display->name());
+                ui::Canvas sp(1280, 720); ui::drawSplash(sp); display->show(sp); display->show(sp);   // the start-up picture a moment
+                std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+            }
             else if (screenMode == 1) std::printf("screen: %s%s%s\n", why.c_str(), why2.empty() ? "" : "; ", why2.c_str());
         }
     }

@@ -49,7 +49,8 @@ echo "== 5/5 services"
 sudo tee /etc/systemd/system/octavio-box.service >/dev/null <<EOF
 [Unit]
 Description=Octavio Synth
-After=sound.target
+After=sound.target octavio-splash.service
+Conflicts=octavio-splash.service
 
 [Service]
 User=$U
@@ -64,13 +65,28 @@ LimitMEMLOCK=infinity
 [Install]
 WantedBy=multi-user.target
 EOF
+# the start-up picture (SINECRAFT, the OCTAVIO logo) as soon as the display driver is up, until the synth takes over
+sudo tee /etc/systemd/system/octavio-splash.service >/dev/null <<EOF
+[Unit]
+Description=Octavio start-up picture
+DefaultDependencies=no
+After=systemd-udevd.service local-fs.target
+Before=octavio-box.service
+
+[Service]
+User=$U
+ExecStart=$B/octavio-box --splash --rotate 90
+
+[Install]
+WantedBy=sysinit.target
+EOF
 sed -e "s#^User=.*#User=$U#" -e "s#^ExecStart=.*#ExecStart=/usr/bin/python3 $SRC/box/systeme/transfert.py --root $H/octavio --port 8080#" \
     "$SRC/box/systeme/octavio-transfert.service" | sudo tee /etc/systemd/system/octavio-transfert.service >/dev/null
 sudo systemctl daemon-reload
-sudo systemctl enable -q octavio-box octavio-transfert
+sudo systemctl enable -q octavio-box octavio-transfert octavio-splash
 sudo systemctl restart octavio-box octavio-transfert || true
 
 echo
 echo "Fini. Redemarre une fois : sudo reboot"
 echo "Ensuite le synthe demarre tout seul. Journal : journalctl -u octavio-box -f"
-echo "Ecran a l'envers ? sudo sed -i 's/--rotate 90/--rotate 270/' /etc/systemd/system/octavio-box.service && sudo systemctl daemon-reload && sudo systemctl restart octavio-box"
+echo "Ecran a l'envers ? sudo sed -i 's/--rotate 90/--rotate 270/' /etc/systemd/system/octavio-box.service /etc/systemd/system/octavio-splash.service && sudo systemctl daemon-reload && sudo systemctl restart octavio-box"
