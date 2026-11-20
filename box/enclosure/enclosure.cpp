@@ -409,7 +409,7 @@ int main() {
                     T - (P - 3.0), CAP_RAISE, CAP_RAISE + WELL);
     }
     {   // --- the knobs, printed: 8 x 18 mm (the encoders with LED rings), 22 mm (knob 9), 14 mm (volume); knurled, a
-        // chamfered top with a white line, a D bore for the 6 mm flatted shafts (4.5 mm across the flat). Printed top
+        // chamfered top (a white line on the volume's only), a D bore for the 6 mm flatted shafts (4.5 mm across the flat). Printed top
         // on the plate (smooth top, bore upwards, no supports). The bore's fit depends on the printer: a test knob
         // per bore size (6.00 / 6.10 / 6.20), then the plate with the one that holds without forcing.
         auto knob = [](double d, double H, double bore, Manifold* line) {
@@ -422,9 +422,9 @@ int main() {
             Manifold b = Manifold::Cylinder(depth, bore / 2, bore / 2, 48) - Manifold::Cube({bore, bore, depth}).Translate({-bore / 2, 4.5 - bore / 2 + (bore - 6.0) / 2, 0});
             k -= b;
             k -= Manifold::Cylinder(0.6, bore / 2 + 0.6, bore / 2, 48);   // a chamfer at the bore's mouth
-            // the white line on top, on the flat's side (for the endless encoders it is only a mark)
-            Manifold l = Manifold::Cube({1.2, r - ch - r * 0.3, 0.6}).Translate({-0.6, r * 0.3, H - 0.6});
-            k -= l; if (line) *line = l;
+            // the white line on top, on the flat's side: only on the volume knob (the encoders turn endlessly, a mark
+            // on them would point anywhere)
+            if (line) { Manifold l = Manifold::Cube({1.2, r - ch - r * 0.3, 0.6}).Translate({-0.6, r * 0.3, H - 0.6}); k -= l; *line = l; }
             return k;
         };
         auto flip = [](const Manifold& m, double H, double x, double y) { return m.Rotate(180, 0, 0).Translate({x, y, H}); };
@@ -435,8 +435,9 @@ int main() {
             struct K { double d, H; } ks[10] = {{18, 16}, {18, 16}, {18, 16}, {18, 16}, {18, 16}, {18, 16}, {18, 16}, {18, 16}, {22, 16}, {14, 14}};
             for (int i = 0; i < 10; ++i) {
                 const double x = (i % 5) * 26.0, y = (i / 5) * 26.0; Manifold l;
-                plate += flip(knob(ks[i].d, ks[i].H, bore, &l), ks[i].H, x, y);
-                lines += flip(l, ks[i].H, x, y);
+                const bool vol = i == 9;   // the volume pot's knob: the only one with a line
+                plate += flip(knob(ks[i].d, ks[i].H, bore, vol ? &l : nullptr), ks[i].H, x, y);
+                if (vol) lines += flip(l, ks[i].H, x, y);
             }
             std::snprintf(name, sizeof name, "octavio-boutons-%.2f-plaque.stl", bore);
             writeStl(plate, name);

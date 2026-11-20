@@ -1,6 +1,6 @@
 # Octavio Synth — fiche d'impression 3D / 3D print sheet
 
-Matière / material : **PETG** (ou ASA), noir / black. Le texte et les traits en blanc / labels and lines in white.
+Matière / material : **PETG** (ou ASA), noir / black. Le texte et le trait du bouton de volume en blanc / labels and the volume knob's line in white.
 Couches / layers : 0,2 mm (0,1 mm pour les capuchons / for the keycaps), 4 parois / walls, remplissage / infill 20 %.
 
 ## Pièces / parts

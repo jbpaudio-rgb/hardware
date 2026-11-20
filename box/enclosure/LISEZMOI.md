@@ -83,7 +83,7 @@ Le boîtier n'a plus de fentes d'aération (ni derrière, ni sur le côté, ni d
   - Un dissipateur passif pour Pi 5, de 7 mm de haut au plus.
   - Le connecteur 2×20 femelle standard du HAT (8,5 mm).
 - **Câbles :** une rallonge USB-C de panneau SparkFun CAB-15455 (vis M3 fournies), et un câble JST PH à 3 fils (pas de 2 mm) entre J2 et les deux jacks de sortie.
-- **Boutons :** imprimés (`octavio-boutons-*-plaque.stl` + `octavio-boutons-traits.stl`) : 8 de 18 mm pour les encodeurs à anneau de LED (pas plus de 18 mm, sinon ils cachent les LED, à 11 mm du centre), 1 de 22 mm pour le gros encodeur, 1 de 14 mm pour le volume. Alésage en D pour axes de 6 mm à méplat ; imprime d'abord `octavio-bouton-test-6.00/6.10/6.20.stl` et garde celui qui tient sans forcer. Voir `FICHE-IMPRESSION.md`.
+- **Boutons :** imprimés (`octavio-boutons-*-plaque.stl` + `octavio-boutons-traits.stl`) : 8 de 18 mm pour les encodeurs à anneau de LED (pas plus de 18 mm, sinon ils cachent les LED, à 11 mm du centre), 1 de 22 mm pour le gros encodeur, 1 de 14 mm pour le volume, le seul avec un trait blanc (les encodeurs tournent sans fin, un trait n'indiquerait rien). Alésage en D pour axes de 6 mm à méplat ; imprime d'abord `octavio-bouton-test-6.00/6.10/6.20.stl` et garde celui qui tient sans forcer. Voir `FICHE-IMPRESSION.md`.
 - **Pieds :** 4 pieds caoutchouc de 12 mm. Le fond a des creux pour les placer.
 
 ## À vérifier avant la version finale
