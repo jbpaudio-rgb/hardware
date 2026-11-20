@@ -382,13 +382,16 @@ int main(int argc, char** argv) {
 #else
     struct Ctx { Box* box; Cpu* cpu; } ctx { &box, &cpu };
     RtAudio audio;
-    if (audio.getDeviceIds().empty()) { std::printf("no audio device\n"); return 1; }
-    RtAudio::StreamParameters out; out.deviceId = device ? device : audio.getDefaultOutputDevice(); out.nChannels = 2;
+    // no sound card that works (no HAT yet, HDMI only): the synth still runs, silent, paced by a clock, so the screen,
+    // the panel and the MIDI work for tests
+    bool silent = audio.getDeviceIds().empty();
+    if (silent) std::printf("no audio device: running silent\n");
+    RtAudio::StreamParameters out; out.deviceId = silent ? 0 : (device ? device : audio.getDefaultOutputDevice()); out.nChannels = 2;
     RtAudio::StreamOptions opt; opt.flags = RTAUDIO_NONINTERLEAVED | RTAUDIO_SCHEDULE_REALTIME | RTAUDIO_MINIMIZE_LATENCY; opt.priority = 80; opt.streamName = "Octavio Box";
     // the line input (LINE IN parts): the output device's own inputs (the HAT's ADC on the same card), else the default
     // input, else none; --input n picks one, --input off none
     RtAudio::StreamParameters in; in.nChannels = 2; bool haveIn = false;
-    if (!noInput) {
+    if (!noInput && !silent) {
         auto ins = [&](unsigned d) { const auto i = audio.getDeviceInfo(d); return i.inputChannels; };
         unsigned d = inDevice ? inDevice : (ins(out.deviceId) >= 1 ? out.deviceId : audio.getDefaultInputDevice());
         if (d && ins(d) >= 1) { in.deviceId = d; in.nChannels = std::min(2u, ins(d)); haveIn = true; }
@@ -407,14 +410,22 @@ int main(int argc, char** argv) {
     if (haveIn && audio.openStream(&out, &in, RTAUDIO_FLOAT32, (unsigned) rate, &buffer, cb, &ctx, &opt) != RTAUDIO_NO_ERROR) {
         std::printf("line input not opened (%s): output only\n", audio.getErrorText().c_str()); haveIn = false;
     }
-    if (!haveIn && audio.openStream(&out, nullptr, RTAUDIO_FLOAT32, (unsigned) rate, &buffer, cb, &ctx, &opt) != RTAUDIO_NO_ERROR) { std::printf("cannot open audio: %s\n", audio.getErrorText().c_str()); return 1; }
+    if (!silent && !haveIn && audio.openStream(&out, nullptr, RTAUDIO_FLOAT32, (unsigned) rate, &buffer, cb, &ctx, &opt) != RTAUDIO_NO_ERROR) {
+        std::printf("cannot open audio (%s): running silent\n", audio.getErrorText().c_str()); silent = true;
+    }
     if (haveIn) std::printf("line in: %s, %u channel%s\n", audio.getDeviceInfo(in.deviceId).name.c_str(), in.nChannels, in.nChannels > 1 ? "s" : "");
     {   // the parts in parallel when the box is busy (box/PartPool.h); one core is left to the screen and the MIDI
         const int hw = (int) std::thread::hardware_concurrency(); const int h = threads >= 0 ? std::min(threads, 3) : std::clamp(hw - 2, 0, 3);
         box.pool.start(h, 70); std::printf("parts: %d helper thread%s (%d cores)\n", h, h == 1 ? "" : "s", hw);
     }
-    audio.startStream();
-    std::printf("audio: %s, %d Hz, %u samples per block (%.1f ms)\n", audio.getDeviceInfo(out.deviceId).name.c_str(), rate, buffer, buffer * 1000.0 / rate);
+    if (!silent) {
+        audio.startStream();
+        std::printf("audio: %s, %d Hz, %u samples per block (%.1f ms)\n", audio.getDeviceInfo(out.deviceId).name.c_str(), rate, buffer, buffer * 1000.0 / rate);
+    } else std::thread([cb, &ctx, buffer, rate] {   // silent: the same callback, on a clock
+        std::vector<float> o(buffer * 2); auto next = std::chrono::steady_clock::now();
+        const auto blk = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>((double) buffer / rate));
+        for (;;) { cb(o.data(), nullptr, buffer, 0, 0, &ctx); next += blk; std::this_thread::sleep_until(next); }
+    }).detach();
 
     MidiIn midiIn(box);   // MIDI bytes go straight to the box's queue
     auto isPanel = [](const std::string& n) { return n.find("Octavio Facade") != std::string::npos; };
@@ -593,7 +604,7 @@ int main(int argc, char** argv) {
             if (left > 0) std::this_thread::sleep_for(std::chrono::duration<double>(left));
         }
     } else terminal();
-    audio.stopStream(); audio.closeStream();
+    if (!silent) { audio.stopStream(); audio.closeStream(); }
     std::_Exit(0);   // detached threads (panel, MIDI, terminal) are still running
 #endif
 }

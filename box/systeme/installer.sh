@@ -28,6 +28,13 @@ for L in "dtoverlay=vc4-kms-v3d" "dtoverlay=vc4-kms-dsi-ili9881-5inch"; do
     grep -q "^$L" "$CFG" || echo "$L" | sudo tee -a "$CFG" >/dev/null
 done
 sudo usermod -aG video,input,audio,render "$U"
+# no sound card of its own yet (the HAT not mounted): the sound goes to the HDMI screen that is plugged in, through
+# ALSA's hdmi plugin (the Pi's HDMI only takes IEC958 frames). With the HAT, its card is used and this file is removed.
+if ! grep -qi "hifiberry\|pcm5\|pcm1863" /proc/asound/cards 2>/dev/null; then
+    P=0; for n in 1 2; do grep -qx connected /sys/class/drm/card*-HDMI-A-$n/status 2>/dev/null && P=$((n - 1)); done
+    printf 'pcm.!default { type plug slave.pcm "hdmi:CARD=vc4hdmi%s,DEV=0" }\nctl.!default { type hw card vc4hdmi%s }\n' $P $P | sudo tee /etc/asound.conf >/dev/null
+    echo "   son : HDMI $P (pas encore de HAT)"
+elif [ -f /etc/asound.conf ] && grep -q vc4hdmi /etc/asound.conf; then sudo rm /etc/asound.conf; fi
 mkdir -p "$H/octavio"   # the sounds, multis and samples (what the transfer page shows)
 
 echo "== 5/5 services"
