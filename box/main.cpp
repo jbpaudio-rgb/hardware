@@ -20,6 +20,7 @@
 #include "third_party/rtmidi/RtMidi.h"
 #endif
 #include <chrono>
+#include <csignal>
 #include <cstdio>
 #include <fstream>
 #include <dirent.h>
@@ -602,6 +603,8 @@ int main(int argc, char** argv) {
 
     std::printf("Ready. Parts 1-4: MINI, PRO70, VACT, DR8 on MIDI channels 1-4. Type help.\n");
     static std::atomic<bool> quit { false };
+    static std::atomic<bool> stopping { false };   // switched off (the Pi's button, sudo poweroff, systemctl stop)
+    std::signal(SIGTERM, [](int) { stopping = true; });
     auto terminal = [&app] {   // the terminal; when it closes (a service has none) the synth keeps running if it has a screen
         std::string line;
         while (std::printf("octavio t%d> ", app.box.selected.load() + 1), std::fflush(stdout), std::getline(std::cin, line)) {
@@ -613,13 +616,25 @@ int main(int argc, char** argv) {
     if (display) {   // the screen runs on the main thread (a window needs it on a Mac), the terminal on its own
         std::thread(terminal).detach();
         ui::Canvas canvas(ui::Screen::W, ui::Screen::H);
-        while (!quit) {
+        while (!quit && !stopping) {
             const double t = nowSec();
             if (!display->poll([&](int what, float x, float y) { if (what == 3) screen.key((int) x); else screen.touch(what, x, y, t); })) break;
             screen.render(canvas, t);
             display->show(canvas);   // the display paces the loop (vertical blank); cap it at ~30 frames per second
             const double left = 1 / 30.0 - (nowSec() - t);
             if (left > 0) std::this_thread::sleep_for(std::chrono::duration<double>(left));
+        }
+        if (stopping) {   // the closing picture: the session kept, then SINECRAFT fading to black
+            { std::lock_guard<std::recursive_mutex> l(appMx); if (!app.sessionFile.empty()) app.save(app.sessionFile); }
+            ui::Canvas sp(1280, 720); ui::drawSplash(sp); ui::Canvas f(1280, 720);
+            const double t0 = nowSec();
+            for (double t = 0; t < 1.6; t = nowSec() - t0) {
+                const float k = t < .6 ? 1.f : std::max(0.f, 1.f - (float) (t - .6));
+                for (size_t i = 0; i < sp.px.size(); ++i) f.px[i] = ui::scale(sp.px[i], k);
+                display->show(f);
+                std::this_thread::sleep_for(std::chrono::milliseconds(16));
+            }
+            f.clear(0); display->show(f); display->show(f);
         }
     } else terminal();
     if (!silent) { audio.stopStream(); audio.closeStream(); }
