@@ -24,9 +24,17 @@ cmake --build "$B" -j2 2>&1 | grep -E "error|Built target" || true   # -j2: fits
 
 echo "== 4/5 ecran et droits"
 CFG=/boot/firmware/config.txt
-for L in "dtoverlay=vc4-kms-v3d" "dtoverlay=vc4-kms-dsi-ili9881-5inch"; do
+for L in "dtoverlay=vc4-kms-v3d" "dtoverlay=vc4-kms-dsi-ili9881-5inch" "disable_splash=1"; do
     grep -q "^$L" "$CFG" || echo "$L" | sudo tee -a "$CFG" >/dev/null
 done
+# a quiet start: no Linux text on the screen, no blinking cursor, no login prompt on it (SSH still works); the screen
+# stays black until the synth appears
+CMD=/boot/firmware/cmdline.txt
+for P in quiet loglevel=0 logo.nologo vt.global_cursor_default=0 systemd.show_status=false rd.udev.log_level=0; do
+    grep -qw "$P" "$CMD" || sudo sed -i "1s/\$/ $P/" "$CMD"
+done
+sudo sed -i '1s/console=tty1/console=tty3/' "$CMD"
+sudo systemctl disable -q getty@tty1 2>/dev/null || true
 sudo usermod -aG video,input,audio,render "$U"
 # no sound card of its own yet (the HAT not mounted): the sound goes to the HDMI screen that is plugged in, through
 # ALSA's hdmi plugin (the Pi's HDMI only takes IEC958 frames). With the HAT, its card is used and this file is removed.
