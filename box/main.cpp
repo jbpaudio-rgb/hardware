@@ -624,12 +624,13 @@ int main(int argc, char** argv) {
             const double left = 1 / 30.0 - (nowSec() - t);
             if (left > 0) std::this_thread::sleep_for(std::chrono::duration<double>(left));
         }
-        if (stopping) {   // the closing picture: the session kept, then SINECRAFT fading to black
+        if (stopping) {   // the closing picture (SINECRAFT small, THIS IS THE END), the session kept, then a fade to black
+            ui::Canvas sp(1280, 720); ui::drawGoodbye(sp); ui::Canvas f(1280, 720);
+            display->show(sp); display->show(sp);
             { std::lock_guard<std::recursive_mutex> l(appMx); if (!app.sessionFile.empty()) app.save(app.sessionFile); }
-            ui::Canvas sp(1280, 720); ui::drawSplash(sp); ui::Canvas f(1280, 720);
             const double t0 = nowSec();
-            for (double t = 0; t < 1.6; t = nowSec() - t0) {
-                const float k = t < .6 ? 1.f : std::max(0.f, 1.f - (float) (t - .6));
+            for (double t = 0; t < 2.5; t = nowSec() - t0) {
+                const float k = t < 1.5 ? 1.f : std::max(0.f, 1.f - (float) (t - 1.5));
                 for (size_t i = 0; i < sp.px.size(); ++i) f.px[i] = ui::scale(sp.px[i], k);
                 display->show(f);
                 std::this_thread::sleep_for(std::chrono::milliseconds(16));
