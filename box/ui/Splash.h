@@ -20,7 +20,7 @@ inline void drawSplash(Canvas& c) {
     "....#..#..#...#.#.....#.....#..#..#...#.#.......#..",
     "####..###.#...#.#####..####.#...#.#...#.#.......#..",
     };
-    const int cols = (int) std::strlen(G[0]), px = std::min((c.w - 160) / cols, 22), gap = std::max(1, px / 10);
+    const int cols = (int) std::strlen(G[0]), px = std::min((c.w - 160) / cols, 22), gap = 0;   // solid letters (no lines between the pixels)
     const int x0 = (c.w - cols * px) / 2, y0 = (c.h - 7 * px) / 2 - px;
     for (int r = 0; r < 7; ++r)
         for (int k = 0; k < cols; ++k)
